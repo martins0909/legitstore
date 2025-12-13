@@ -669,7 +669,7 @@ const Shop = () => {
 
       {/* Purchase Summary Dialog */}
       <Dialog open={showPurchaseSummaryDialog} onOpenChange={setShowPurchaseSummaryDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-full max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <BadgeCheck className="h-5 w-5 text-green-600" />
@@ -717,8 +717,8 @@ const Shop = () => {
                 </div>
                 <div className="space-y-2">
                   {purchaseSummaryData.serials.map((serial, idx) => (
-                    <div key={serial} className="flex items-center gap-2 bg-gray-100 rounded px-2 py-1">
-                      <span className="font-mono text-sm text-blue-700">{serial}</span>
+                    <div key={serial} className="flex items-start gap-2 bg-gray-100 rounded px-2 py-1">
+                      <span className="font-mono text-sm text-blue-700 break-all flex-1 min-w-0">{serial}</span>
                       <button
                         type="button"
                         className="ml-2 text-blue-600 hover:text-blue-800"
