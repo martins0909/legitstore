@@ -1356,7 +1356,7 @@ const Shop = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 mb-1">
                           <div className="min-w-0 flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
-                            <h4 className="font-semibold text-xs md:text-sm text-gray-900 dark:text-gray-100 truncate line-clamp-1 flex-1 min-w-0">
+                            <h4 className="font-semibold text-xs md:text-sm text-gray-900 dark:text-gray-100 line-clamp-2 flex-1 min-w-0">
                               {item.name}
                             </h4>
                             {item.quantity > 1 && (
@@ -1384,8 +1384,8 @@ const Shop = () => {
                             </p>
                             <div className="space-y-1">
                               {item.assignedSerials.map((serial, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                  <Badge className="text-xs font-mono bg-blue-600 hover:bg-blue-700 px-2 py-0.5 flex-1">
+                                <div key={idx} className="flex items-start gap-2">
+                                  <Badge className="text-xs font-mono bg-blue-600 hover:bg-blue-700 px-2 py-0.5 flex-1 min-w-0 break-all whitespace-normal text-left">
                                     {serial}
                                   </Badge>
                                   <Button
