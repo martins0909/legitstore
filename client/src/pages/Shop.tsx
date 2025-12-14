@@ -1380,7 +1380,7 @@ const Shop = () => {
                         {item.assignedSerials && item.assignedSerials.length > 0 && (
                           <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
                             <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">
-                              Serial Number{item.assignedSerials.length > 1 ? 's' : ''}:
+                              Logs:
                             </p>
                             <div className="space-y-1">
                               {item.assignedSerials.map((serial, idx) => (
