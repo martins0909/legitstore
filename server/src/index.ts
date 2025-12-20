@@ -11,24 +11,52 @@ import paymentsRouter from "./routes/payments";
 dotenv.config();
 
 const app = express();
-// allow CORS from local dev and a production frontend URL set via env
+// CORS: allow requests from the frontend origins and ensure preflight responses
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:8080";
-app.use(cors({
-  origin: [
-    FRONTEND_URL, 
-    'https://legitstorez.com',
-    'https://www.legitstorez.com',
-    'https://legitstore.vercel.app',
-    'http://localhost:8080', 
-    'http://localhost:8081', 
-    'http://localhost:4001', 
-    'http://localhost:4000',
-    'http://localhost:5173'
-  ],
+const ALLOWED_ORIGINS = [
+  FRONTEND_URL,
+  'https://legitstorez.com',
+  'https://www.legitstorez.com',
+  'https://legitstore.vercel.app',
+  'http://localhost:8080',
+  'http://localhost:8081',
+  'http://localhost:4001',
+  'http://localhost:4000',
+  'http://localhost:5173'
+].filter(Boolean);
+
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // allow non-browser requests (e.g., curl) with no origin set
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+  credentials: true,
+};
+
+app.use(cors(corsOptions as any));
+
+// Ensure explicit preflight handling for all routes (important on some platforms)
+app.options('*', cors(corsOptions as any));
+
+// Fallback middleware: set CORS headers when origin is allowed (helps when a proxy
+// or other middleware short-circuits and removes headers)
+app.use((req, res, next) => {
+  const origin = req.headers.origin as string | undefined;
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  // respond immediately to OPTIONS
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 app.use(express.json());
 
 // Payment routes (Ercaspay integration)
