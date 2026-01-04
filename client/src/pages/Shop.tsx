@@ -104,6 +104,8 @@ const Shop = () => {
     balanceBefore: number;
     balanceAfter: number;
   } | null>(null);
+  // Manual add funds dialog (mobile)
+  const [showManualAddFundsDialog, setShowManualAddFundsDialog] = useState(false);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -744,6 +746,50 @@ const Shop = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Manual Add Funds Dialog (mobile) */}
+      <Dialog open={showManualAddFundsDialog} onOpenChange={setShowManualAddFundsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Manual Add Funds</DialogTitle>
+            <DialogDescription>
+              Use the details below to make a manual bank transfer. Add the description so we can identify your payment.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
+              <p className="text-sm font-semibold">Bank: <span className="font-normal">Palmpay</span></p>
+              <p className="text-sm font-semibold">Account no.: <span className="font-normal">7026057454</span></p>
+              <p className="text-sm font-semibold">Account name: <span className="font-normal">Clinton Kenechukwu</span></p>
+              <p className="text-sm font-semibold">Description: <span className="font-normal">Bills</span></p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const details = `Bank: Palmpay\nAccount no.: 7026057454\nAccount name: Clinton Kenechukwu\nDescription: Bills`;
+                  navigator.clipboard.writeText(details);
+                  toast.success('Account details copied');
+                }}
+                className="flex-1"
+              >
+                Copy Details
+              </Button>
+              <Button
+                onClick={() => setShowManualAddFundsDialog(false)}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowManualAddFundsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="pt-24 relative z-10">
         {/* Banner Section with Welcome Badge - Full Width */}
         <div className="relative mb-6 animate-in fade-in slide-in-from-top duration-500">
@@ -862,6 +908,16 @@ const Shop = () => {
                     <Plus className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                     Add Funds
                   </Button>
+                </div>
+                {/* Mobile-only manual add funds button */}
+                <div className="mt-2 md:hidden px-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualAddFundsDialog(true)}
+                    className="w-full inline-flex items-center justify-center px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium text-gray-800 border border-gray-200"
+                  >
+                    Add funds manually
+                  </button>
                 </div>
               </CardContent>
             </Card>
