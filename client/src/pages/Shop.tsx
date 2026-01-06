@@ -824,6 +824,16 @@ const Shop = () => {
           <h1 className="mt-6 text-center text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 tracking-tight">
             Shop Premium Products
           </h1>
+          <div className="mt-4 flex justify-center">
+            <a
+              href="https://www.smslegit.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors shadow-md"
+            >
+              Click here to get ur sms number
+            </a>
+          </div>
         </div>
 
         <div className="px-6">
