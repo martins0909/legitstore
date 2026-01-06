@@ -730,7 +730,7 @@ const Shop = () => {
                         }}
                         aria-label="Copy serial"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16h8M8 12h8m-8-4h8M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                        <Copy className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
