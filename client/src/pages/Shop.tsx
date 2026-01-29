@@ -657,7 +657,7 @@ const Shop = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-hidden pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative md:overflow-hidden pb-20 transition-colors duration-300">
       {/* Animated gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -809,7 +809,7 @@ const Shop = () => {
             href="https://chat.whatsapp.com/Jyr22tl4NNA6GJ5dXIpAlv?mode=wwt" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="block relative overflow-hidden rounded-2xl shadow-xl border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors mx-auto w-3/4 md:w-full"
+            className="block relative overflow-hidden rounded-none md:rounded-2xl shadow-xl border-y-2 md:border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors w-screen left-1/2 -translate-x-1/2 md:w-full md:left-auto md:translate-x-0 md:mx-auto"
           >
             <img
               src={bannerImg}
@@ -1059,13 +1059,18 @@ const Shop = () => {
                                     <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-5">{product.description}</p>
                                   </div>
 
-                                  {/* Desktop Layout: Description, Price, Button */}
+                                  {/* Desktop Layout: Description, Button */}
                                   <div className="hidden md:flex md:items-center md:gap-4 md:flex-1">
                                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-5 flex-1">{product.description}</p>
                                     <div className="text-right flex-shrink-0">
-                                      <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300">
-                                        ₦{product.price.toFixed(2)}
-                                      </p>
+                                      <Button 
+                                        onClick={() => handleBuyClick(product)}
+                                        disabled={availableStock === 0}
+                                        className={`h-10 px-6 ${availableStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500'} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg`}
+                                      >
+                                        <ShoppingCart className="h-4 w-4 mr-2" />
+                                        {availableStock === 0 ? 'Out of Stock' : 'Buy Now'}
+                                      </Button>
                                     </div>
                                   </div>
 
@@ -1197,13 +1202,18 @@ const Shop = () => {
                                 <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-5">{product.description}</p>
                               </div>
 
-                              {/* Desktop Layout: Description, Price, Button */}
+                              {/* Desktop Layout: Description, Button */}
                               <div className="hidden md:flex md:items-center md:gap-4 md:flex-1">
                                 <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-5 flex-1">{product.description}</p>
                                 <div className="text-right flex-shrink-0">
-                                  <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300">
-                                    ₦{product.price.toFixed(2)}
-                                  </p>
+                                  <Button 
+                                    onClick={() => handleBuyClick(product)}
+                                    disabled={availableStock === 0}
+                                    className={`h-10 px-6 ${availableStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500'} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg`}
+                                  >
+                                    <ShoppingCart className="h-4 w-4 mr-2" />
+                                    {availableStock === 0 ? 'Out of Stock' : 'Buy Now'}
+                                  </Button>
                                 </div>
                               </div>
 
