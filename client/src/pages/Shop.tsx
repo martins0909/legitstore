@@ -657,7 +657,7 @@ const Shop = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative md:overflow-hidden pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-x-hidden md:overflow-hidden pb-20 transition-colors duration-300">
       {/* Animated gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -809,7 +809,7 @@ const Shop = () => {
             href="https://chat.whatsapp.com/Jyr22tl4NNA6GJ5dXIpAlv?mode=wwt" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="block relative overflow-hidden rounded-none md:rounded-2xl shadow-xl border-y-2 md:border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors w-screen left-1/2 -translate-x-1/2 md:w-full md:left-auto md:translate-x-0 md:mx-auto"
+            className="block relative overflow-hidden rounded-none md:rounded-2xl shadow-xl border-y-2 md:border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors w-screen left-1/2 -ml-[48vw] pr-2 md:w-full md:left-auto md:ml-0 md:pr-0"
           >
             <img
               src={bannerImg}
@@ -949,7 +949,7 @@ const Shop = () => {
                   Our Products
                 </h2>
                 {/* Category Filters */}
-                <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 animate-in fade-in slide-in-from-left duration-500 px-3 md:px-0">
+                <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 animate-in fade-in slide-in-from-left duration-500 -ml-8 w-[calc(100%+4rem)] px-4 md:px-0 md:ml-0 md:w-full box-border">
                   {categories.map(cat => (
                     <Button
                       key={cat}
@@ -992,7 +992,7 @@ const Shop = () => {
                             </Button>
                           )}
                         </div>
-                        <div className="space-y-3 md:space-y-4">
+                        <div className="space-y-3 md:space-y-4 -mx-6 w-[calc(100%+3rem)] md:mx-0 md:w-full">
                           {displayedProducts.map((product, index) => {
                             const availableStock = (product.serialNumbers || []).filter(s => !s.isUsed).length;
                             
