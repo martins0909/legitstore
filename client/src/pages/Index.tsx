@@ -314,10 +314,10 @@ const Index = () => {
                       <div>
                         <h3 className="text-lg font-bold md:text-2xl">{category}</h3>
                       </div>
-                      <div className="mt-0.5 ml-auto inline-grid w-[58%] grid-cols-3 gap-2 self-end rounded-full border border-white/35 bg-white/28 px-2.5 py-1 text-right shadow-[0_8px_20px_rgba(15,23,42,0.12)] backdrop-blur-md md:mt-2 md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:px-4">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white md:text-xs">Stock</span>
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white md:text-xs">Price</span>
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white md:text-xs">Action</span>
+                      <div className="mt-1 ml-auto inline-grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 self-end rounded-full border border-white/35 bg-white/28 px-3 py-1.5 text-center shadow-[0_8px_20px_rgba(15,23,42,0.12)] backdrop-blur-md md:mt-2 md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:px-4">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-xs md:tracking-[0.22em]">Stock</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-xs md:tracking-[0.22em]">Price</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-xs md:tracking-[0.22em]">Action</span>
                       </div>
                     </div>
                   </div>
@@ -328,7 +328,7 @@ const Index = () => {
                         <article key={product.id} className="border-t border-slate-200 px-4 py-3 first:border-t-0 md:px-6 dark:border-slate-800">
                           <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
                             <div className="flex min-w-0 flex-1 items-start gap-3">
-                              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900 md:h-12 md:w-12">
+                              <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900 md:h-12 md:w-12">
                                 <img
                                   src={product.image}
                                   alt={product.name}
@@ -345,23 +345,23 @@ const Index = () => {
                               </div>
                             </div>
 
-                            <div className="ml-auto grid w-[58%] grid-cols-3 gap-3 border-t border-slate-200 pt-3 text-right md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:items-center md:gap-4 md:border-t-0 md:pt-0 dark:border-slate-800">
-                              <div>
-                                <div className="mt-1 inline-flex min-w-[68px] items-center justify-center rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                            <div className="ml-auto grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 border-t border-slate-200 pt-3 text-center md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:border-t-0 md:pt-0 dark:border-slate-800">
+                              <div className="flex w-full justify-center">
+                                <div className="mt-1 inline-flex min-w-[66px] items-center justify-center rounded-full bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                                   {product.stockCount}pc
                                 </div>
                               </div>
 
-                              <div>
-                                <div className="mt-1 inline-flex min-w-[96px] items-center justify-center rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                              <div className="flex w-full justify-center">
+                                <div className="mt-1 inline-flex min-w-[92px] items-center justify-center rounded-full bg-slate-100 px-2.5 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                                   ₦{Number.isInteger(product.price) ? product.price : product.price.toFixed(2)}
                                 </div>
                               </div>
 
-                              <div>
+                              <div className="flex w-full justify-center">
                                 <Button
                                   onClick={() => navigate(`/shop?category=${encodeURIComponent(category)}&search=${encodeURIComponent(product.name)}`)}
-                                  className="mt-1 h-7 w-full rounded-full bg-blue-600 px-2 text-[11px] font-semibold text-white hover:bg-blue-500 md:h-8 md:px-3 md:text-sm"
+                                  className="mt-1 h-7 w-full max-w-[78px] rounded-full bg-blue-600 px-2 text-[11px] font-semibold text-white hover:bg-blue-500 md:h-8 md:max-w-none md:px-3 md:text-sm"
                                 >
                                   Buy
                                 </Button>
