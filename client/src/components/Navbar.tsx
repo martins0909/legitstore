@@ -122,10 +122,10 @@ const Navbar = ({
                     }
                     setShowCategoryMenu((current) => !current);
                   }}
-                  className="h-10 w-10 rounded-full bg-blue-700 text-white shadow-sm backdrop-blur-md hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+                  className={isShopPage ? "h-9 w-9 rounded-none bg-transparent p-0 text-blue-700 shadow-none backdrop-blur-none hover:bg-transparent dark:text-blue-300" : "h-10 w-10 rounded-full bg-blue-700 text-white shadow-sm backdrop-blur-md hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"}
                   aria-label="Open categories menu"
                 >
-                  <Menu className="h-4 w-4" />
+                  <Menu className={isShopPage ? "h-5 w-5" : "h-4 w-4"} />
                 </Button>
                 {showCategoryMenu && !isShopPage && (
                   <div className="absolute left-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
@@ -266,7 +266,7 @@ const Navbar = ({
                       setShowCategoryMenu(false);
                       setShowSearchInput((current) => !current);
                     }}
-                    className="h-10 w-10 rounded-full bg-white/45 text-blue-700 backdrop-blur-md hover:bg-blue-50 dark:bg-slate-900/45 dark:text-blue-300 dark:hover:bg-slate-900/70"
+                    className="h-8 w-8 rounded-none bg-transparent p-0 text-blue-700 shadow-none backdrop-blur-none hover:bg-transparent dark:text-blue-300 dark:hover:bg-transparent"
                     aria-label="Search products"
                   >
                     <Search className="h-4 w-4" />
@@ -306,17 +306,17 @@ const Navbar = ({
 
             {!isShopPage && (
               <div className="md:hidden">
-                <ThemeToggle />
+                <ThemeToggle className="h-8 w-8 rounded-none border-0 bg-transparent p-0 shadow-none backdrop-blur-none hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent" iconClassName="h-4 w-4" />
               </div>
             )}
 
             {isShopPage ? (
               <div className="relative group cursor-pointer" onClick={onCartClick}>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300"></div>
-                <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <History className="h-6 w-6 text-white" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/15 to-purple-400/15 blur-sm group-hover:blur-md transition-all duration-300"></div>
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-purple-600 transition-transform duration-300 group-hover:scale-105">
+                  <History className="h-[18px] w-[18px] text-white" />
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-gradient-to-br from-pink-500 to-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg animate-pulse">
+                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-red-500 text-[10px] font-bold text-white shadow-lg animate-pulse">
                       {cartItemCount}
                     </span>
                   )}
@@ -325,7 +325,7 @@ const Navbar = ({
             ) : (
               <Button 
                 onClick={() => navigate("/auth")}
-                className="h-10 rounded-full bg-blue-700 px-5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+                className="h-8 rounded-full bg-blue-700 px-3 text-xs font-semibold text-white shadow-md transition-all duration-300 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 md:h-10 md:px-5 md:text-sm md:shadow-lg"
               >
                 Sign In
               </Button>

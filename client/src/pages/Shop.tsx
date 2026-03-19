@@ -476,9 +476,9 @@ const Shop = () => {
     const isActive = activeMobileSection === section;
 
     return {
-      button: `relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-colors duration-300 ${isActive ? "bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-300" : "text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-slate-800"}`,
-      icon: `flex h-10 w-10 items-center justify-center rounded-2xl transition-colors duration-300 ${isActive ? "bg-blue-100 text-blue-700 dark:bg-slate-700 dark:text-blue-300" : "bg-blue-100 text-blue-700 dark:bg-slate-800 dark:text-blue-300"}`,
-      label: "text-[11px] font-semibold",
+      button: `relative flex flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors duration-300 ${isActive ? "bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-300" : "text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-slate-800"}`,
+      icon: `flex h-8 w-8 items-center justify-center rounded-xl transition-colors duration-300 ${isActive ? "bg-blue-100 text-blue-700 dark:bg-slate-700 dark:text-blue-300" : "bg-blue-100 text-blue-700 dark:bg-slate-800 dark:text-blue-300"}`,
+      label: "text-[10px] font-semibold leading-none",
     };
   };
 
@@ -1721,15 +1721,15 @@ const Shop = () => {
         </a>
       </div>
 
-      <div className="fixed inset-x-4 bottom-4 z-50 md:hidden">
-        <div className="grid grid-cols-4 rounded-[2rem] border border-white/70 bg-white/92 p-2 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-950/92">
+      <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
+        <div className="grid grid-cols-4 rounded-none border-x-0 border-b-0 border-t border-white/70 bg-white/92 px-3 py-1.5 shadow-[0_-10px_28px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-950/92">
           <button
             type="button"
             onClick={handleMobileFundClick}
             className={getMobileNavClasses("fund").button}
           >
             <span className={getMobileNavClasses("fund").icon}>
-              <WalletIcon className="h-5 w-5" />
+              <WalletIcon className="h-[18px] w-[18px]" />
             </span>
             <span className={getMobileNavClasses("fund").label}>Fund</span>
           </button>
@@ -1742,7 +1742,7 @@ const Shop = () => {
             className={getMobileNavClasses("category").button}
           >
             <span className={getMobileNavClasses("category").icon}>
-              <Menu className="h-5 w-5" />
+              <Menu className="h-[18px] w-[18px]" />
             </span>
             <span className={getMobileNavClasses("category").label}>Category</span>
           </button>
@@ -1755,9 +1755,9 @@ const Shop = () => {
             className={getMobileNavClasses("order").button}
           >
             <span className={getMobileNavClasses("order").icon}>
-              <History className="h-5 w-5" />
+              <History className="h-[18px] w-[18px]" />
               {purchaseHistory.length > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[9px] font-bold text-white">
                   {purchaseHistory.length}
                 </span>
               )}
@@ -1773,7 +1773,7 @@ const Shop = () => {
             className={getMobileNavClasses("deposit").button}
           >
             <span className={getMobileNavClasses("deposit").icon}>
-              <Banknote className="h-5 w-5" />
+              <Banknote className="h-[18px] w-[18px]" />
             </span>
             <span className={getMobileNavClasses("deposit").label}>Deposit</span>
           </button>
