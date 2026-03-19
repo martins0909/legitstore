@@ -6,6 +6,7 @@ import { Mail, Lock } from "lucide-react";
 import { useState } from "react";
 
 import { apiFetch } from "@/lib/api";
+import logo from "@/assets/imagebackground.png";
 
 type Props = {
   onLogin: (token: string) => void;
@@ -46,7 +47,7 @@ const AdminLogin = ({ onLogin }: Props) => {
         <CardHeader className="relative text-center space-y-3 pb-4">
           <div className="inline-flex items-center justify-center mx-auto">
             <img
-              src="/logo.png"
+              src={logo}
               alt="Legit Store Logo"
               className="h-16 w-auto drop-shadow-xl transition-transform duration-300 hover:scale-105"
             />

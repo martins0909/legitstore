@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI } from "@/lib/api";
-import { Banknote, ChevronDown, History, Copy } from "lucide-react";
+import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon } from "lucide-react";
 import bannerImg from "@/assets/banner.jpg";
 import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus } from "lucide-react";
 // Removed demo product assets; shop now shows only database products
@@ -46,10 +46,14 @@ interface User {
   [key: string]: unknown;
 }
 
+type MobileSection = "fund" | "category" | "order" | "deposit";
+
 const initialProducts: Product[] = [];
 
 const Shop = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const [user, setUser] = useState<User | null>(null);
   const [addFundsAmount, setAddFundsAmount] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -106,6 +110,12 @@ const Shop = () => {
   } | null>(null);
   // Manual add funds dialog (mobile)
   const [showManualAddFundsDialog, setShowManualAddFundsDialog] = useState(false);
+  const [showCategorySheet, setShowCategorySheet] = useState(false);
+  const [activeMobileSection, setActiveMobileSection] = useState<MobileSection>("fund");
+  const walletSectionRef = useRef<HTMLDivElement | null>(null);
+  const walletInputRef = useRef<HTMLInputElement | null>(null);
+  const searchQuery = searchParams.get("search")?.trim().toLowerCase() || "";
+  const categoryQuery = searchParams.get("category")?.trim() || "All";
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -372,7 +382,17 @@ const Shop = () => {
   };
 
   // Group products by category
-  const groupedProducts = products.reduce((acc, product) => {
+  const filteredProducts = products.filter((product) => {
+    if (!searchQuery) return true;
+
+    const haystack = [product.name, product.description, product.category]
+      .join(" ")
+      .toLowerCase();
+
+    return haystack.includes(searchQuery);
+  });
+
+  const groupedProducts = filteredProducts.reduce((acc, product) => {
     if (!acc[product.category]) {
       acc[product.category] = [];
     }
@@ -382,6 +402,31 @@ const Shop = () => {
 
   // Get categories that have products (excluding "All")
   const categoriesWithProducts = categories.filter(cat => cat !== "All" && groupedProducts[cat]?.length > 0);
+  const shopCategoryMenuItems = categoriesWithProducts.map((category) => ({
+    name: category,
+    image: groupedProducts[category]?.[0]?.image || bannerImg,
+    productCount: groupedProducts[category]?.length || 0,
+  }));
+  const completedDeposits = depositHistory.filter((entry) => {
+    const normalizedStatus = (entry.status || "").toLowerCase();
+    return normalizedStatus === "completed" || normalizedStatus === "success" || normalizedStatus === "successful";
+  });
+
+  useEffect(() => {
+    if (activeCategory !== "All" && !groupedProducts[activeCategory]?.length) {
+      setActiveCategory("All");
+    }
+  }, [activeCategory, groupedProducts]);
+
+  useEffect(() => {
+    if (!categoryQuery || categoryQuery === "All") {
+      setActiveCategory("All");
+      return;
+    }
+
+    const matchedCategory = categories.find((category) => category.toLowerCase() === categoryQuery.toLowerCase());
+    setActiveCategory(matchedCategory || "All");
+  }, [categoryQuery, categories]);
 
   // Function to toggle category expansion
   const toggleCategoryExpansion = (category: string) => {
@@ -411,6 +456,60 @@ const Shop = () => {
       }
     }
   };
+
+  const handleCategoryNavigation = (category: string) => {
+    setActiveMobileSection("category");
+    setActiveCategory(category);
+    scrollToCategory(category);
+    setShowCategorySheet(false);
+  };
+
+  const handleMobileFundClick = () => {
+    setActiveMobileSection("fund");
+    walletSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => {
+      walletInputRef.current?.focus();
+    }, 350);
+  };
+
+  const getMobileNavClasses = (section: MobileSection) => {
+    const isActive = activeMobileSection === section;
+
+    return {
+      button: `relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 transition-colors duration-300 ${isActive ? "bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-300" : "text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-slate-800"}`,
+      icon: `flex h-10 w-10 items-center justify-center rounded-2xl transition-colors duration-300 ${isActive ? "bg-blue-100 text-blue-700 dark:bg-slate-700 dark:text-blue-300" : "bg-blue-100 text-blue-700 dark:bg-slate-800 dark:text-blue-300"}`,
+      label: "text-[11px] font-semibold",
+    };
+  };
+
+  const getDepositMethodLabel = (entry: { method?: string; reference?: string }) => {
+    const normalizedMethod = (entry.method || "").toLowerCase();
+    const normalizedReference = (entry.reference || "").toLowerCase();
+
+    if (normalizedMethod === "cash" || normalizedMethod === "manual" || normalizedReference.startsWith("manual_")) {
+      return "Manual";
+    }
+
+    return "ERCASPAY";
+  };
+
+  useEffect(() => {
+    if (showCategorySheet) {
+      setActiveMobileSection("category");
+    }
+  }, [showCategorySheet]);
+
+  useEffect(() => {
+    if (showPurchaseHistory) {
+      setActiveMobileSection("order");
+    }
+  }, [showPurchaseHistory]);
+
+  useEffect(() => {
+    if (showDepositHistory) {
+      setActiveMobileSection("deposit");
+    }
+  }, [showDepositHistory]);
 
   const handleAddFunds = async () => {
     const amount = parseFloat(addFundsAmount);
@@ -657,7 +756,7 @@ const Shop = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-x-hidden md:overflow-hidden pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-x-hidden md:overflow-hidden pb-28 md:pb-20 transition-colors duration-300">
       {/* Animated gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -667,7 +766,115 @@ const Shop = () => {
         isShopPage 
         cartItemCount={purchaseHistory.length} 
         onCartClick={() => setShowPurchaseHistory(true)}
+        shopCategories={shopCategoryMenuItems}
+        activeShopCategory={activeCategory}
+        onShopCategorySelect={handleCategoryNavigation}
+        onShopCategoryMenuOpen={() => setShowCategorySheet(true)}
       />
+
+      <Dialog open={showCategorySheet} onOpenChange={setShowCategorySheet}>
+        <DialogContent className="fixed inset-x-0 bottom-0 top-auto w-full max-w-none translate-x-0 translate-y-0 rounded-t-[2rem] rounded-b-none border-x-0 border-b-0 border-t border-white/60 bg-white/95 p-0 shadow-[0_-20px_60px_rgba(15,23,42,0.22)] data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom dark:border-slate-800 dark:bg-slate-950/95 sm:max-w-none">
+          <div className="mx-auto mt-3 h-1.5 w-16 rounded-full bg-slate-200 dark:bg-slate-700" />
+          <DialogHeader className="px-5 pt-4 pb-2 text-left">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-blue-700 dark:text-blue-300">
+              <Menu className="h-5 w-5" />
+              Browse Categories
+            </DialogTitle>
+            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+              Pick a category from the same list shown in the mobile navbar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[72vh] space-y-2 overflow-y-auto px-4 pb-8 pt-2">
+            <button
+              type="button"
+              onClick={() => handleCategoryNavigation("All")}
+              className={`flex w-full items-center justify-between rounded-[1.4rem] border px-4 py-3.5 text-left transition-colors ${activeCategory === "All" ? "border-blue-200 bg-blue-50 shadow-sm dark:border-slate-700 dark:bg-slate-800" : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"}`}
+            >
+              <span>
+                <span className="block text-sm font-semibold text-blue-700 dark:text-blue-300">All Categories</span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">Show everything in the shop</span>
+              </span>
+              <Badge className="bg-blue-600 text-white">{categoriesWithProducts.length}</Badge>
+            </button>
+            {shopCategoryMenuItems.map((category) => (
+              <button
+                key={category.name}
+                type="button"
+                onClick={() => handleCategoryNavigation(category.name)}
+                className={`flex w-full items-center gap-3 rounded-[1.4rem] border px-3 py-3.5 text-left transition-colors ${activeCategory === category.name ? "border-blue-200 bg-blue-50 shadow-sm dark:border-slate-700 dark:bg-slate-800" : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"}`}
+              >
+                <img src={category.image} alt={category.name} className="h-14 w-14 rounded-2xl object-cover" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-blue-700 dark:text-blue-300">{category.name}</span>
+                  <span className="block text-xs text-slate-500 dark:text-slate-400">{category.productCount} item{category.productCount === 1 ? "" : "s"}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDepositHistory} onOpenChange={setShowDepositHistory}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md rounded-[1.75rem] border border-white/60 bg-white/95 p-0 shadow-2xl dark:border-slate-800 dark:bg-slate-950/95">
+          <DialogHeader className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-blue-700 dark:text-blue-300">
+              <Banknote className="h-5 w-5" />
+              Deposit History
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Completed deposits only.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[70vh] overflow-y-auto px-4 py-4">
+            {completedDeposits.length === 0 ? (
+              <div className="py-10 text-center">
+                <Banknote className="mx-auto h-14 w-14 text-slate-300 dark:text-slate-700" />
+                <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">No completed deposits found.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {completedDeposits.map((deposit, index) => (
+                  <div
+                    key={deposit._id || `${deposit.reference || "deposit"}-${index}`}
+                    className="rounded-[1.4rem] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-base font-bold text-blue-700 dark:text-blue-300">₦{(deposit.amount || 0).toFixed(2)}</p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300">
+                            {getDepositMethodLabel(deposit)}
+                          </Badge>
+                          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300">
+                            Complete
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                      {new Date(deposit.createdAt).toLocaleString()}
+                    </p>
+                    {deposit.reference && (
+                      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Ref: {deposit.reference}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="border-t border-slate-100 px-4 py-4 dark:border-slate-800">
+            <Button
+              type="button"
+              onClick={() => setShowDepositHistory(false)}
+              className="w-full rounded-2xl bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Purchase Summary Dialog */}
       <Dialog open={showPurchaseSummaryDialog} onOpenChange={setShowPurchaseSummaryDialog}>
@@ -845,6 +1052,7 @@ const Shop = () => {
             </div>
 
             {/* Wallet Section */}
+            <div ref={walletSectionRef}>
             <Card className="mb-6 md:mb-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl border-2 border-white/60 dark:border-gray-800 animate-in fade-in slide-in-from-left duration-700">
               <CardHeader className="pb-3 md:pb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -856,33 +1064,6 @@ const Shop = () => {
                     >
                       <Banknote className="w-6 h-6 text-white" />
                     </button>
-      {/* Deposit history modal component inline */}
-      {showDepositHistory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 w-full max-w-md mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2"><Banknote className="w-5 h-5 text-blue-600" /> Deposits</h2>
-              <button onClick={() => setShowDepositHistory(false)} className="text-gray-500 hover:text-red-500 text-xl">&times;</button>
-            </div>
-            <div className="max-h-80 overflow-y-auto">
-              {depositHistory.length === 0 ? (
-                <div className="text-gray-500 text-center py-8">No deposits found.</div>
-              ) : (
-                <ul className="divide-y divide-gray-200 dark:divide-gray-800">
-                  {depositHistory.map((d, i) => (
-                    <li key={d._id || i} className="py-3 flex flex-col gap-1">
-                      <span className="font-semibold text-blue-700 dark:text-blue-400">₦{d.amount?.toFixed(2)}</span>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">{d.method?.toUpperCase()} • {d.status?.toUpperCase()}</span>
-                      <span className="text-xs text-gray-400">{new Date(d.createdAt).toLocaleString()}</span>
-                      {d.reference && <span className="text-xs text-gray-400">Ref: {d.reference}</span>}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0">
                       <Wallet className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
@@ -904,6 +1085,7 @@ const Shop = () => {
               <CardContent className="pt-0">
                 <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                   <Input
+                    ref={walletInputRef}
                     type="number"
                     placeholder="Enter amount"
                     value={addFundsAmount}
@@ -932,6 +1114,7 @@ const Shop = () => {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </div>
         </div>
 
@@ -1508,12 +1691,12 @@ const Shop = () => {
       </Dialog>
 
       {/* Floating Social Support Icons */}
-      <div className="fixed bottom-8 left-6 z-50">
+      <div className="fixed bottom-24 left-6 z-50 md:bottom-8">
         <a
           href="https://chat.whatsapp.com/Jyr22tl4NNA6GJ5dXIpAlv?mode=wwt"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-300"
+          className="flex items-center justify-center w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-300"
           aria-label="Contact us on WhatsApp"
         >
           <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
@@ -1522,7 +1705,7 @@ const Shop = () => {
         </a>
       </div>
 
-      <div className="fixed bottom-8 right-6 z-50">
+      <div className="fixed bottom-24 right-6 z-50 md:bottom-8">
         <a
           href="https://t.me/LEGITSUPPORT2"
           target="_blank"
@@ -1536,6 +1719,65 @@ const Shop = () => {
             </svg>
           </div>
         </a>
+      </div>
+
+      <div className="fixed inset-x-4 bottom-4 z-50 md:hidden">
+        <div className="grid grid-cols-4 rounded-[2rem] border border-white/70 bg-white/92 p-2 shadow-[0_18px_48px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-950/92">
+          <button
+            type="button"
+            onClick={handleMobileFundClick}
+            className={getMobileNavClasses("fund").button}
+          >
+            <span className={getMobileNavClasses("fund").icon}>
+              <WalletIcon className="h-5 w-5" />
+            </span>
+            <span className={getMobileNavClasses("fund").label}>Fund</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMobileSection("category");
+              setShowCategorySheet(true);
+            }}
+            className={getMobileNavClasses("category").button}
+          >
+            <span className={getMobileNavClasses("category").icon}>
+              <Menu className="h-5 w-5" />
+            </span>
+            <span className={getMobileNavClasses("category").label}>Category</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMobileSection("order");
+              setShowPurchaseHistory(true);
+            }}
+            className={getMobileNavClasses("order").button}
+          >
+            <span className={getMobileNavClasses("order").icon}>
+              <History className="h-5 w-5" />
+              {purchaseHistory.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">
+                  {purchaseHistory.length}
+                </span>
+              )}
+            </span>
+            <span className={getMobileNavClasses("order").label}>Order</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMobileSection("deposit");
+              setShowDepositHistory(true);
+            }}
+            className={getMobileNavClasses("deposit").button}
+          >
+            <span className={getMobileNavClasses("deposit").icon}>
+              <Banknote className="h-5 w-5" />
+            </span>
+            <span className={getMobileNavClasses("deposit").label}>Deposit</span>
+          </button>
+        </div>
       </div>
     </div>
   );

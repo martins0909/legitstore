@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Mail, Lock, User, ArrowRight, Shield } from "lucide-react";
 import { apiFetch, catalogAPI, catalogCategoriesAPI, warmBackend } from "@/lib/api";
+import logo from "@/assets/imagebackground.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -169,16 +170,16 @@ const Auth = () => {
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top duration-500">
           <div className="inline-flex items-center justify-center mb-4">
             <img 
-              src="/logo.png" 
+              src={logo} 
               alt="Legit Store" 
               className="h-20 w-auto drop-shadow-2xl"
             />
           </div>
           <h1 
-            className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 mb-3 animate-shimmer"
+            className="text-4xl md:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-3"
             style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' }}
           >
-            Welcome to Legit Store
+            Welcome
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-lg">Your trusted marketplace for authentic accounts</p>
         </div>
@@ -187,14 +188,14 @@ const Auth = () => {
           <TabsList className="grid w-full grid-cols-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg p-1 h-12">
             <TabsTrigger 
               value="signin" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg transition-all duration-300 font-medium dark:text-gray-300"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-300 font-medium dark:text-gray-300"
             >
               <User className="w-4 h-4 mr-2" />
               Sign In
             </TabsTrigger>
             <TabsTrigger 
               value="signup" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg transition-all duration-300 font-medium dark:text-gray-300"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-300 font-medium dark:text-gray-300"
             >
               <Mail className="w-4 h-4 mr-2" />
               Sign Up
@@ -205,7 +206,7 @@ const Auth = () => {
             <Card className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl border-white/60 dark:border-gray-800 border-2 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30 pointer-events-none"></div>
               <CardHeader className="relative space-y-1 pb-6">
-                <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-700">Sign In</CardTitle>
+                <CardTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400">Sign In</CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">Enter your credentials to access your account</CardDescription>
               </CardHeader>
               <CardContent className="relative">
@@ -249,7 +250,7 @@ const Auth = () => {
                   <Button 
                     type="submit"
                     disabled={isSigningIn}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
                   >
                     <span className="flex items-center justify-center gap-2">
                       {isSigningIn ? "Signing In..." : "Sign In"}
@@ -272,7 +273,7 @@ const Auth = () => {
                       </DialogTrigger>
                       <DialogContent className="bg-white/95 backdrop-blur-xl border-2 border-white/60 shadow-2xl dark:bg-gray-900/95 dark:border-gray-800">
                         <DialogHeader>
-                          <DialogTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-400 dark:to-purple-400 flex items-center gap-2">
+                          <DialogTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
                             <Mail className="w-5 h-5 text-blue-600" />
                             Reset Your Password
                           </DialogTitle>
@@ -310,7 +311,7 @@ const Auth = () => {
                             </Button>
                             <Button 
                               type="submit" 
-                              className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                             >
                               Send Reset Link
                             </Button>
@@ -328,7 +329,7 @@ const Auth = () => {
             <Card className="bg-white/95 backdrop-blur-xl shadow-2xl border-white/60 border-2 overflow-hidden dark:bg-gray-900/95 dark:border-gray-800">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-transparent to-pink-50/50 dark:from-purple-950/30 dark:via-transparent dark:to-pink-950/30 pointer-events-none"></div>
               <CardHeader className="relative space-y-1 pb-6">
-                <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-400 dark:to-purple-400">Create Account</CardTitle>
+                <CardTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400">Create Account</CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-400">Sign up to start your shopping journey</CardDescription>
               </CardHeader>
               <CardContent className="relative">
@@ -390,7 +391,7 @@ const Auth = () => {
                   <Button 
                     type="submit"
                     disabled={isSigningUp}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
                   >
                     <span className="flex items-center justify-center gap-2">
                       {isSigningUp ? "Creating Account..." : "Create Account"}
