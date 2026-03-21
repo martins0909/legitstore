@@ -272,6 +272,17 @@ router.get('/verify', async (req, res) => {
 });
 
 /**
+ * GET /api/payments/webhook
+ * Browser-friendly health response for the webhook endpoint
+ */
+router.get('/webhook', (_req, res) => {
+  return res.status(200).json({
+    ok: true,
+    message: 'Webhook endpoint is active. Ercaspay should send POST requests to this URL.',
+  });
+});
+
+/**
  * POST /api/payments/webhook
  * Ercaspay webhook endpoint to receive transaction updates
  * Note: For production, verify signatures if the provider supports it.
