@@ -155,8 +155,8 @@ const Index = () => {
       </section>
 
       {/* ℹ️ About Section */}
-      <section id="about" className="bg-white px-6 py-16 md:py-24" aria-labelledby="about-title">
-        <div className="container mx-auto">
+      <section id="about" className="bg-white px-0 py-16 md:px-6 md:py-24" aria-labelledby="about-title">
+        <div className="w-full md:container md:mx-auto">
           <div className="grid items-start gap-8 md:grid-cols-[1.04fr_0.96fr] md:gap-10">
             <div className="order-2 space-y-5 animate-in fade-in slide-in-from-left duration-700 md:order-1">
               <div className="space-y-4 rounded-[2rem] border border-slate-200 bg-white p-6 md:p-8">
