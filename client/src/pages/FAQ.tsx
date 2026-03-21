@@ -30,7 +30,7 @@ const faqItems = [
 
 const FAQ = () => {
   return (
-    <main className="min-h-screen bg-[#f8f5ee] pb-20 text-slate-900 dark:bg-gray-950 dark:text-slate-100">
+    <main className="min-h-screen bg-[#f8f5ee] pb-20 text-slate-900 transition-colors duration-300 dark:bg-[#020409] dark:text-slate-100">
       <Navbar />
 
       <section className="px-6 pt-28 md:pt-32">
@@ -45,7 +45,7 @@ const FAQ = () => {
 
           <div className="space-y-4">
             {faqItems.map((item) => (
-              <Card key={item.question} className="border-white/60 bg-white/75 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+              <Card key={item.question} className="border-white/60 bg-white/75 backdrop-blur-xl dark:border-white/10 dark:bg-black/55">
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold text-blue-700 dark:text-blue-400">{item.question}</h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 md:text-base">{item.answer}</p>

@@ -86,7 +86,7 @@ const Index = () => {
     .filter((category) => (homeProductsByCategory[category] || []).length > 0);
 
   return (
-  <main className="min-h-screen flex flex-col bg-white dark:bg-gray-950 relative overflow-hidden transition-colors duration-300">
+  <main className="relative flex min-h-screen flex-col overflow-hidden bg-white transition-colors duration-300 dark:bg-[#020409]">
       
       {/* 🧭 Navbar */}
       <Navbar />
@@ -155,12 +155,12 @@ const Index = () => {
       </section>
 
       {/* ℹ️ About Section */}
-      <section id="about" className="bg-white px-2 py-16 md:px-6 md:py-24" aria-labelledby="about-title">
+      <section id="about" className="bg-white px-2 py-16 transition-colors duration-300 dark:bg-[#04070d] md:px-6 md:py-24" aria-labelledby="about-title">
         <div className="w-full md:container md:mx-auto">
           <div className="grid items-start gap-8 md:grid-cols-[1.04fr_0.96fr] md:gap-10">
             <div className="order-2 space-y-5 animate-in fade-in slide-in-from-left duration-700 md:order-1">
-              <div className="space-y-4 rounded-[2rem] border border-slate-200 bg-white p-6 md:p-8">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-blue-700">
+              <div className="space-y-4 rounded-[2rem] border border-slate-200 bg-white p-6 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/76 md:p-8">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-blue-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-blue-300">
                   <Users className="h-4 w-4" />
                   Trusted Marketplace
                 </div>
@@ -173,37 +173,37 @@ const Index = () => {
                   >
                     About LegitStore
                   </h2>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 md:text-lg">
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 dark:text-slate-300 md:text-lg">
                     We offer a wide range of accounts tailored to various needs. Professional social media growth services built for users who want dependable digital products and a clean buying experience.
                   </p>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/75">
                     <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
                       <Globe2 className="h-4 w-4" />
                       Social Platforms
                     </div>
-                    <p className="text-sm leading-6 text-slate-600">
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
                       Foreign & local Facebook, Instagram, TikTok, YouTube, Twitter, Discord accounts, old email, Twitch, and many more.
                     </p>
                   </div>
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/75">
                     <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
                       <Shield className="h-4 w-4" />
                       Verification Support
                     </div>
-                    <p className="text-sm leading-6 text-slate-600">
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
                       Virtual numbers for WhatsApp, Telegram, SMS, and OTP verification to support fast and smooth account setup.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5">
-                  <p className="text-sm leading-7 text-slate-700 md:text-base">
+                <div className="rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/72">
+                  <p className="text-sm leading-7 text-slate-700 dark:text-slate-300 md:text-base">
                     We will help you gain more followers and boost your account. With thousands of satisfied customers worldwide, we have built a reputation for reliability, quality, and customer satisfaction.
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-slate-700 md:text-base">
+                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300 md:text-base">
                     Join our community today and experience the difference.
                   </p>
                 </div>
@@ -234,53 +234,53 @@ const Index = () => {
               ].map((feature) => (
                 <article
                   key={feature.title}
-                  className="rounded-[1.5rem] border border-slate-200 bg-white p-5"
+                  className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/72"
                 >
-                  <div className="mb-4 inline-flex rounded-2xl bg-blue-50 p-3 text-blue-700">
+                  <div className="mb-4 inline-flex rounded-2xl bg-blue-50 p-3 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
                     {feature.icon}
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900 md:text-lg">{feature.title}</h3>
-                  <p className="mt-2 text-xs leading-6 text-slate-600 md:text-sm">{feature.desc}</p>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 md:text-lg">{feature.title}</h3>
+                  <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-300 md:text-sm">{feature.desc}</p>
                 </article>
               ))}
             </div>
             </div>
 
             <div className="order-1 grid gap-4 animate-in fade-in slide-in-from-right duration-700 md:order-2 md:grid-rows-[1.15fr_0.85fr]">
-              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white">
+              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/78">
                 <img
                   src={customerImage}
                   alt="Satisfied LegitStore customers"
                   className="h-64 w-full object-cover md:h-full"
                 />
-                <div className="border-t border-slate-200 px-5 py-4">
+                <div className="border-t border-slate-200 px-5 py-4 dark:border-white/10">
                   <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
                     <Users className="h-4 w-4" />
                     Customer Satisfaction
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
                     Thousands of customers trust LegitStore for reliable service, quality products, and consistent support.
                   </p>
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
-                <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/78">
                   <img
                     src={boardImage}
                     alt="LegitStore team working around the clock for customer satisfaction"
                     className="h-56 w-full object-cover md:h-full"
                   />
                 </div>
-                <div className="rounded-[2rem] border border-slate-200 bg-white px-5 py-5">
+                <div className="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/74">
                   <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
                     <Zap className="h-4 w-4" />
                     Always Available
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-slate-700">
+                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300">
                     We work 24/7 to ensure customer satisfaction, fast responses, and a service experience that feels dependable every time.
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-slate-700">
+                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300">
                     From account delivery to verification tools, our focus stays on making every order smooth and trustworthy.
                   </p>
                 </div>
@@ -348,7 +348,7 @@ const Index = () => {
                             <div className="ml-auto grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 border-t border-slate-200 pt-3 text-center md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:border-t-0 md:pt-0 dark:border-slate-800">
                               <div className="flex w-full justify-center">
                                 <div className="mt-1 inline-flex min-w-[66px] items-center justify-center rounded-full bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                                  {product.stockCount}pc
+                                  {product.stockCount}pcx
                                 </div>
                               </div>
 
@@ -387,7 +387,7 @@ const Index = () => {
       </section>
 
       {/* 📜 Footer */}
-      <footer className="relative z-10 mx-5 mb-5 mt-auto rounded-2xl border border-slate-200 bg-white px-6 py-12 dark:border-slate-800 dark:bg-gray-950 md:mx-6 md:mb-6">
+      <footer className="relative z-10 mx-5 mb-5 mt-auto rounded-2xl border border-slate-200 bg-white px-6 py-12 dark:border-white/10 dark:bg-black/55 md:mx-6 md:mb-6">
         <div className="container mx-auto flex flex-col items-center text-center">
           <img
             src={logo}
@@ -435,7 +435,7 @@ const Index = () => {
               <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
             </svg>
           </div>
-          <span className="text-xs font-medium text-gray-700 bg-white/80 backdrop-blur px-2 py-1 rounded-full shadow">online agent</span>
+          <span className="rounded-full bg-white/80 px-2 py-1 text-xs font-medium text-gray-700 shadow backdrop-blur dark:bg-slate-900/80 dark:text-slate-200">online agent</span>
         </a>
       </div>
     </main>

@@ -502,7 +502,7 @@ const Shop = () => {
           <div className="ml-auto grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 border-t border-slate-200 pt-3 text-center md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:border-t-0 md:pt-0 dark:border-slate-800">
             <div className="flex w-full justify-center">
               <div className={`mt-1 inline-flex min-w-[66px] items-center justify-center rounded-full px-2.5 py-1 text-sm font-semibold ${isOutOfStock ? "bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"}`}>
-                {availableStock}pc
+                {availableStock}pcx
               </div>
             </div>
 
@@ -982,25 +982,25 @@ const Shop = () => {
             </DialogDescription>
           </DialogHeader>
           {purchaseSummaryData && (
-            <div className="space-y-4">
+            <div className="space-y-4 text-slate-900 dark:text-slate-100">
               <div className="flex items-center gap-3">
-                <img src={purchaseSummaryData.product?.image} alt={purchaseSummaryData.product?.name} className="w-16 h-16 rounded-lg object-contain border" />
+                <img src={purchaseSummaryData.product?.image} alt={purchaseSummaryData.product?.name} className="h-16 w-16 rounded-lg border border-slate-200 object-contain dark:border-white/10" />
                 <div>
-                  <div className="font-bold text-lg">{purchaseSummaryData.product?.name}</div>
-                  <div className="text-sm text-gray-500">{purchaseSummaryData.product?.category}</div>
+                  <div className="text-lg font-bold">{purchaseSummaryData.product?.name}</div>
+                  <div className="text-sm text-gray-500 dark:text-slate-400">{purchaseSummaryData.product?.category}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="font-semibold text-gray-700">Wallet Before:</div>
-                <div className="text-gray-800">₦{purchaseSummaryData.balanceBefore.toFixed(2)}</div>
-                <div className="font-semibold text-gray-700">Wallet After:</div>
-                <div className="text-gray-800">₦{purchaseSummaryData.balanceAfter.toFixed(2)}</div>
-                <div className="font-semibold text-gray-700">Quantity:</div>
-                <div className="text-gray-800">{purchaseSummaryData.quantity}</div>
+                <div className="font-semibold text-gray-700 dark:text-slate-300">Wallet Before:</div>
+                <div className="text-gray-800 dark:text-slate-100">₦{purchaseSummaryData.balanceBefore.toFixed(2)}</div>
+                <div className="font-semibold text-gray-700 dark:text-slate-300">Wallet After:</div>
+                <div className="text-gray-800 dark:text-slate-100">₦{purchaseSummaryData.balanceAfter.toFixed(2)}</div>
+                <div className="font-semibold text-gray-700 dark:text-slate-300">Quantity:</div>
+                <div className="text-gray-800 dark:text-slate-100">{purchaseSummaryData.quantity}</div>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-semibold text-gray-700">Serial Number{purchaseSummaryData.serials.length > 1 ? 's' : ''}:</div>
+                  <div className="font-semibold text-gray-700 dark:text-slate-300">Serial Number{purchaseSummaryData.serials.length > 1 ? 's' : ''}:</div>
                   {purchaseSummaryData.serials.length > 1 && (
                     <Button
                       size="sm"
@@ -1019,11 +1019,11 @@ const Shop = () => {
                 </div>
                 <div className="space-y-2">
                   {purchaseSummaryData.serials.map((serial, idx) => (
-                    <div key={serial} className="flex items-start gap-2 bg-gray-100 rounded px-2 py-1">
-                      <span className="font-mono text-sm text-blue-700 break-all flex-1 min-w-0">{serial}</span>
+                    <div key={serial} className="flex items-start gap-2 rounded border border-slate-200 bg-gray-100 px-2 py-1 dark:border-white/10 dark:bg-slate-950/85">
+                      <span className="min-w-0 flex-1 break-all font-mono text-sm text-blue-700 dark:text-blue-300">{serial}</span>
                       <button
                         type="button"
-                        className="ml-2 text-blue-600 hover:text-blue-800"
+                        className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
                         onClick={() => {
                           navigator.clipboard.writeText(serial);
                           toast.success('Serial copied!');
@@ -1200,7 +1200,7 @@ const Shop = () => {
                   <button
                     type="button"
                     onClick={() => setShowManualAddFundsDialog(true)}
-                    className="w-full inline-flex items-center justify-center px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm font-medium text-gray-800 border border-gray-200"
+                    className="inline-flex w-full items-center justify-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-slate-950/80 dark:text-slate-100 dark:hover:bg-slate-900"
                   >
                     Add funds manually
                   </button>
@@ -1533,7 +1533,7 @@ const Shop = () => {
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-        <div className="grid grid-cols-4 rounded-none border-x-0 border-b-0 border-t border-white/70 bg-white/92 px-3 py-1.5 shadow-[0_-10px_28px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-950/92">
+        <div className="grid grid-cols-4 rounded-none border-x-0 border-b-0 border-t border-white/70 bg-white/92 px-3 py-1.5 shadow-[0_-10px_28px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-black/88">
           <button
             type="button"
             onClick={handleMobileFundClick}

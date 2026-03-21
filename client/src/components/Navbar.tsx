@@ -104,7 +104,7 @@ const Navbar = ({
     : categories;
 
   return (
-    <nav className="fixed left-5 right-5 top-5 z-50 rounded-2xl border border-white/40 bg-white/45 backdrop-blur-2xl shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/35 md:left-6 md:right-6 md:top-6">
+    <nav className="fixed left-5 right-5 top-5 z-50 rounded-2xl border border-white/40 bg-white/45 backdrop-blur-2xl shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-black/42 dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)] md:left-6 md:right-6 md:top-6">
       <div className="container mx-auto px-4 py-3 md:px-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 md:min-w-[240px]">
@@ -128,7 +128,7 @@ const Navbar = ({
                   <Menu className={isShopPage ? "h-5 w-5" : "h-4 w-4"} />
                 </Button>
                 {showCategoryMenu && !isShopPage && (
-                  <div className="absolute left-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                  <div className="absolute left-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/88">
                     <div className="max-h-80 overflow-y-auto">
                       {displayedCategories.length > 0 ? displayedCategories.map((category) => (
                         <button
@@ -184,7 +184,7 @@ const Navbar = ({
                     </span>
                   </Button>
                   {showCategoryMenu && (
-                    <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/50 bg-white/85 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                    <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/50 bg-white/85 p-2 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/88">
                       <div className="max-h-80 overflow-y-auto">
                         {displayedCategories.length > 0 ? displayedCategories.map((category) => (
                           <button
@@ -207,7 +207,7 @@ const Navbar = ({
                   type="button"
                   variant="ghost"
                   onClick={() => navigate("/faq")}
-                  className="hidden h-10 rounded-full bg-white/45 px-4 text-sm font-semibold text-blue-700 backdrop-blur-md hover:bg-blue-50 md:inline-flex dark:bg-slate-900/45 dark:text-blue-300 dark:hover:bg-slate-900/70"
+                  className="hidden h-10 rounded-full bg-white/45 px-4 text-sm font-semibold text-blue-700 backdrop-blur-md hover:bg-blue-50 md:inline-flex dark:bg-black/50 dark:text-blue-300 dark:hover:bg-black/72"
                 >
                   FAQ
                 </Button>
@@ -221,19 +221,19 @@ const Navbar = ({
                       setShowCategoryMenu(false);
                       setShowSearchInput((current) => !current);
                     }}
-                    className="h-10 w-10 rounded-full bg-white/45 text-blue-700 backdrop-blur-md hover:bg-blue-50 dark:bg-slate-900/45 dark:text-blue-300 dark:hover:bg-slate-900/70"
+                    className="h-10 w-10 rounded-full bg-white/45 text-blue-700 backdrop-blur-md hover:bg-blue-50 dark:bg-black/50 dark:text-blue-300 dark:hover:bg-black/72"
                     aria-label="Search products"
                   >
                     <Search className="h-4 w-4" />
                   </Button>
                   {showSearchInput && (
-                    <div className="absolute right-0 top-12 z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-3 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                    <div className="absolute right-0 top-12 z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-3 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/88">
                       <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
                         <Input
                           value={searchText}
                           onChange={(event) => setSearchText(event.target.value)}
                           placeholder="Enter product name"
-                          className="h-10 border-slate-200/80 bg-white/70 text-sm dark:border-slate-700 dark:bg-slate-950/60"
+                          className="h-10 border-slate-200/80 bg-white/70 text-sm dark:border-white/10 dark:bg-black/55"
                           aria-label="Enter product name"
                         />
                         <Button
@@ -272,13 +272,13 @@ const Navbar = ({
                     <Search className="h-4 w-4" />
                   </Button>
                   {showSearchInput && (
-                    <div className="absolute right-0 top-12 z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-3 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                    <div className="absolute right-0 top-12 z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-white/50 bg-white/90 p-3 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-black/88">
                       <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
                         <Input
                           value={searchText}
                           onChange={(event) => setSearchText(event.target.value)}
                           placeholder="Enter product name"
-                          className="h-10 border-slate-200/80 bg-white/70 text-sm dark:border-slate-700 dark:bg-slate-950/60"
+                          className="h-10 border-slate-200/80 bg-white/70 text-sm dark:border-white/10 dark:bg-black/55"
                           aria-label="Enter product name"
                         />
                         <Button

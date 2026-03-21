@@ -52,23 +52,23 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 210 25% 8%;
+    --background: 220 30% 4%;
     --foreground: 210 20% 98%;
 
-    --card: 210 22% 12%;
+    --card: 220 22% 7%;
     --card-foreground: 210 20% 98%;
 
-    --popover: 210 22% 12%;
+    --popover: 220 22% 7%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 186 75% 55%;
-    --primary-foreground: 210 25% 8%;
+    --primary: 195 85% 60%;
+    --primary-foreground: 220 30% 4%;
     --primary-glow: 186 85% 65%;
 
-    --secondary: 210 18% 18%;
+    --secondary: 220 16% 11%;
     --secondary-foreground: 210 20% 98%;
 
-    --muted: 210 18% 18%;
+    --muted: 220 16% 10%;
     --muted-foreground: 210 15% 65%;
 
     --accent: 40 85% 60%;
@@ -80,15 +80,15 @@ All colors MUST be HSL.
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 18% 18%;
-    --input: 210 18% 18%;
-    --ring: 186 75% 55%;
+    --border: 220 18% 15%;
+    --input: 220 18% 15%;
+    --ring: 195 85% 60%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(186 75% 55%), hsl(186 85% 65%));
-    --gradient-subtle: linear-gradient(180deg, hsl(210 25% 8%), hsl(210 22% 12%));
+    --gradient-primary: linear-gradient(135deg, hsl(195 85% 60%), hsl(214 95% 72%));
+    --gradient-subtle: linear-gradient(180deg, hsl(220 30% 4%), hsl(220 22% 7%));
     
-    --shadow-elegant: 0 10px 40px -10px hsl(186 75% 55% / 0.3);
-    --shadow-card: 0 4px 20px -2px hsl(0 0% 0% / 0.4);
+    --shadow-elegant: 0 14px 46px -12px hsl(195 85% 60% / 0.28);
+    --shadow-card: 0 18px 48px -18px hsl(0 0% 0% / 0.85);
   }
 }
 
@@ -100,10 +100,42 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+    min-height: 100vh;
+    position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   html {
     scroll-behavior: smooth;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+  }
+
+  body::before {
+    background:
+      radial-gradient(circle at 18% 20%, hsl(204 100% 60% / 0.12), transparent 34%),
+      radial-gradient(circle at 82% 18%, hsl(218 100% 70% / 0.1), transparent 30%),
+      radial-gradient(circle at 50% 115%, hsl(192 100% 65% / 0.08), transparent 42%);
+    opacity: 0;
+  }
+
+  body::after {
+    background: linear-gradient(180deg, hsl(220 30% 4%), hsl(220 30% 3%));
+    opacity: 0;
+  }
+
+  .dark body::before,
+  .dark body::after {
+    opacity: 1;
   }
 }
 

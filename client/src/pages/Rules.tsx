@@ -11,7 +11,7 @@ const rules = [
 
 const Rules = () => {
   return (
-    <main className="min-h-screen bg-[#f8f5ee] pb-20 text-slate-900 dark:bg-gray-950 dark:text-slate-100">
+    <main className="min-h-screen bg-[#f8f5ee] pb-20 text-slate-900 transition-colors duration-300 dark:bg-[#020409] dark:text-slate-100">
       <Navbar />
 
       <section className="px-6 pt-28 md:pt-32">
@@ -24,11 +24,11 @@ const Rules = () => {
             </p>
           </div>
 
-          <Card className="border-white/60 bg-white/75 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70">
+          <Card className="border-white/60 bg-white/75 backdrop-blur-xl dark:border-white/10 dark:bg-black/55">
             <CardContent className="p-6 md:p-8">
               <ol className="space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-300 md:text-base">
                 {rules.map((rule) => (
-                  <li key={rule} className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-950/60">
+                  <li key={rule} className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-950/80">
                     {rule}
                   </li>
                 ))}
