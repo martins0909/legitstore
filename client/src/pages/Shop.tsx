@@ -472,6 +472,99 @@ const Shop = () => {
     }, 350);
   };
 
+  const formatPrice = (price: number) => (Number.isInteger(price) ? price : price.toFixed(2));
+
+  const renderShopProductRow = (product: Product) => {
+    const availableStock = (product.serialNumbers || []).filter((serial) => !serial.isUsed).length;
+    const isOutOfStock = availableStock === 0;
+
+    return (
+      <article key={product.id} className="border-t border-slate-200 px-4 py-3 first:border-t-0 md:px-6 dark:border-slate-800">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900 md:h-12 md:w-12">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col gap-1">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 md:text-base">{product.name}</h4>
+              </div>
+              <p className="mt-1.5 text-xs leading-5 text-slate-600 dark:text-slate-300 md:text-sm">{product.description}</p>
+            </div>
+          </div>
+
+          <div className="ml-auto grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 border-t border-slate-200 pt-3 text-center md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:border-t-0 md:pt-0 dark:border-slate-800">
+            <div className="flex w-full justify-center">
+              <div className={`mt-1 inline-flex min-w-[66px] items-center justify-center rounded-full px-2.5 py-1 text-sm font-semibold ${isOutOfStock ? "bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"}`}>
+                {availableStock}pc
+              </div>
+            </div>
+
+            <div className="flex w-full justify-center">
+              <div className="mt-1 inline-flex min-w-[92px] items-center justify-center rounded-full bg-slate-100 px-2.5 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                ₦{formatPrice(product.price)}
+              </div>
+            </div>
+
+            <div className="flex w-full justify-center">
+              <Button
+                onClick={() => handleBuyClick(product)}
+                disabled={isOutOfStock}
+                className={`mt-1 h-7 w-full max-w-[78px] rounded-full px-2 text-[11px] font-semibold text-white md:h-8 md:max-w-none md:px-3 md:text-sm ${isOutOfStock ? "bg-slate-400 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-700" : "bg-blue-600 hover:bg-blue-500"}`}
+              >
+                {isOutOfStock ? "Out" : "Buy"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  };
+
+  const renderCategoryBlock = (category: string) => {
+    const categoryProducts = groupedProducts[category] || [];
+    const displayedProducts = getProductsToDisplay(category);
+    const hasMore = categoryProducts.length > 5;
+    const isExpanded = expandedCategories[category];
+
+    return (
+      <div key={category} id={`category-${category}`} className="scroll-mt-24 border-y border-slate-200 bg-[#f8fbff] dark:border-slate-800 dark:bg-slate-900/70">
+        <div className="bg-blue-700 px-4 py-2 text-white md:px-6 md:py-3">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h3 className="text-lg font-bold md:text-2xl">{category}</h3>
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={() => toggleCategoryExpansion(category)}
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-blue-100 transition-colors hover:text-white md:text-sm"
+                >
+                  <span>{isExpanded ? "Show Less" : "See More"}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+                </button>
+              )}
+            </div>
+            <div className="mt-1 ml-auto inline-grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 self-end rounded-full border border-white/35 bg-white/28 px-3 py-1.5 text-center shadow-[0_8px_20px_rgba(15,23,42,0.12)] backdrop-blur-md md:mt-2 md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:px-4">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-xs md:tracking-[0.22em]">Stock</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-xs md:tracking-[0.22em]">Price</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-xs md:tracking-[0.22em]">Action</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          {displayedProducts.map((product) => renderShopProductRow(product))}
+        </div>
+      </div>
+    );
+  };
+
   const getMobileNavClasses = (section: MobileSection) => {
     const isActive = activeMobileSection === section;
 
@@ -1043,8 +1136,8 @@ const Shop = () => {
           </div>
         </div>
 
-        <div className="px-6">
-          <div className="container mx-auto">
+        <div className="px-0 md:px-6">
+          <div className="w-full md:container md:mx-auto">
             
             {/* Header Section (subtitle only now, main title moved into banner) */}
             <div className="text-center mb-8 md:mb-12 animate-in fade-in slide-in-from-top duration-700">
@@ -1120,7 +1213,7 @@ const Shop = () => {
 
         {/* Products Section - Full Width on Mobile */}
         <div className="px-0 md:px-6">
-          <div className="container mx-auto">
+          <div className="w-full md:container md:mx-auto">
             {/* Products and Buy Dialog */}
             <div className="grid lg:grid-cols-1 gap-8">
               {/* Products Grid */}
@@ -1150,291 +1243,9 @@ const Shop = () => {
 
                 {/* Display products grouped by category */}
                 {activeCategory === "All" ? (
-                  // Show all categories with headings
-                  <div className="space-y-8 md:space-y-12">
-                    {categoriesWithProducts.map((category) => {
-                      const categoryProducts = groupedProducts[category] || [];
-                      const displayedProducts = getProductsToDisplay(category);
-                      const hasMore = categoryProducts.length > 5;
-                      const isExpanded = expandedCategories[category];
-
-                      return (
-                      <div key={category} id={`category-${category}`} className="scroll-mt-24">
-                        <div className="flex items-center justify-between mb-4 md:mb-6 px-3 md:px-0">
-                          <h3 className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 border-b-2 border-gray-200 dark:border-gray-800 pb-2 flex-1">
-                            {category}
-                          </h3>
-                          {hasMore && (
-                            <Button
-                              variant="ghost"
-                              onClick={() => toggleCategoryExpansion(category)}
-                              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
-                            >
-                              <span className="text-sm md:text-base">{isExpanded ? 'Show Less' : 'See More'}</span>
-                              <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                            </Button>
-                          )}
-                        </div>
-                        <div className="space-y-3 md:space-y-4 -mx-6 w-[calc(100%+3rem)] md:mx-0 md:w-full">
-                          {displayedProducts.map((product, index) => {
-                            const availableStock = (product.serialNumbers || []).filter(s => !s.isUsed).length;
-                            
-                            return (
-                            <Card 
-                              key={product.id} 
-                              className="bg-white/90 backdrop-blur-xl shadow-lg border-2 border-l-0 border-r-0 md:border-l-2 md:border-r-2 border-white/60 hover:shadow-xl transition-all duration-300 group animate-in fade-in slide-in-from-bottom dark:bg-gray-900/90 dark:border-gray-800 mx-0 rounded-none md:rounded-lg"
-                              style={{ animationDelay: `${index * 50}ms` }}
-                            >
-                              <CardContent className="p-0">
-                                <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-4 md:p-4">
-                                  {/* Top Section: Image and Info (Mobile Full Width) */}
-                                  <div className="flex items-start gap-3 p-3 md:p-0 md:flex-1">
-                                    {/* Small Product Image */}
-                                    <div className="relative overflow-hidden rounded-lg flex-shrink-0">
-                                      <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-purple-400/0 group-hover:from-blue-400/20 group-hover:to-purple-400/20 transition-all duration-300 z-10"></div>
-                                      <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                                      />
-                                    </div>
-                                    
-                                    {/* Product Info */}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-start gap-2 mb-0.5 md:mb-1">
-                                        <Badge variant="outline" className="px-1.5 md:px-2 py-0.5 text-xs tracking-wide bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-none flex-shrink-0 dark:from-blue-950 dark:to-purple-950 dark:text-blue-400">
-                                          {product.category}
-                                        </Badge>
-                                        {availableStock > 0 && (
-                                          <Badge variant="outline" className="hidden md:inline-flex px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800">
-                                              {availableStock} in stock
-                                            </Badge>
-                                          )}
-                                        {availableStock === 0 && (
-                                          <Badge variant="outline" className="hidden md:inline-flex px-1.5 py-0.5 text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
-                                            Out of stock
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center justify-between gap-3 w-full">
-                                        <h3 className="font-bold text-sm md:text-base lg:text-lg mb-0.5 md:mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-400 dark:to-purple-400 truncate md:whitespace-normal flex-1 min-w-0">{product.name}</h3>
-                                        <p className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300 flex-shrink-0">
-                                          ₦{product.price.toFixed(2)}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    
-                                    {/* Price (Mobile - Right Side) */}
-                                    <div className="text-right flex-shrink-0 md:hidden">
-                                     
-                                      {/* {availableStock === 0 && (
-                                        <div className="mt-0.5">
-                                          <Badge variant="outline" className="px-1.5 py-0.5 text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
-                                            Out of stock
-                                          </Badge>
-                                        </div>
-                                      )} */}
-                                    </div>
-                                  </div>
-
-                                  {/* Description (Mobile Full Width) */}
-                                  <div className="px-3 pb-3 md:hidden">
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-5">{product.description}</p>
-                                  </div>
-
-                                  {/* Desktop Layout: Description, Button */}
-                                  <div className="hidden md:flex md:items-center md:gap-4 md:flex-1">
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-5 flex-1">{product.description}</p>
-                                    <div className="text-right flex-shrink-0">
-                                      <Button 
-                                        onClick={() => handleBuyClick(product)}
-                                        disabled={availableStock === 0}
-                                        className={`h-10 px-6 ${availableStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500'} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg`}
-                                      >
-                                        <ShoppingCart className="h-4 w-4 mr-2" />
-                                        {availableStock === 0 ? 'Out of Stock' : 'Buy Now'}
-                                      </Button>
-                                    </div>
-                                  </div>
-
-                                  {/* Buy Button and Price (Mobile Full Width) */}
-                                  <div className="px-3 pb-3 md:p-0 md:flex-shrink-0 md:hidden flex items-center justify-between gap-2">
-                                    <Button 
-                                      onClick={() => handleBuyClick(product)}
-                                      disabled={availableStock === 0}
-                                      className={`h-8 px-3 ${availableStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500'} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg text-xs`}
-                                    >
-                                      <ShoppingCart className="h-3 w-3 mr-1" />
-                                      {availableStock === 0 ? 'Out of Stock' : 'Buy Now'}
-                                    </Button>
-                                    <div className="flex flex-col items-end">
-                                      {/* <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300">
-                                        ₦{product.price.toFixed(2)}
-                                      </span> */}
-                                      {availableStock > 0 ? (
-                                        <Badge variant="outline" className="mt-1 px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800 block">
-                                          {availableStock} in stock
-                                        </Badge>
-                                      ) : (
-                                        <Badge variant="outline" className="mt-1 px-1.5 py-0.5 text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800 block">
-                                          Out of stock
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                            );
-                          })}
-                        </div>
-                      </div>
-                      );
-                    })}
-                  </div>
+                  <div className="space-y-8 md:space-y-12">{categoriesWithProducts.map((category) => renderCategoryBlock(category))}</div>
                 ) : (
-                  // Show single category
-                  <div id={`category-${activeCategory}`} className="scroll-mt-24">
-                    {(() => {
-                      const categoryProducts = groupedProducts[activeCategory] || [];
-                      const displayedProducts = getProductsToDisplay(activeCategory);
-                      const hasMore = categoryProducts.length > 5;
-                      const isExpanded = expandedCategories[activeCategory];
-
-                      return (
-                        <>
-                          <div className="flex items-center justify-between mb-4 md:mb-6 px-3 md:px-0">
-                            <h3 className="text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 border-b-2 border-gray-200 dark:border-gray-800 pb-2 flex-1">
-                              {activeCategory}
-                            </h3>
-                            {hasMore && (
-                              <Button
-                                variant="ghost"
-                                onClick={() => toggleCategoryExpansion(activeCategory)}
-                                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
-                              >
-                                <span className="text-sm md:text-base">{isExpanded ? 'Show Less' : 'See More'}</span>
-                                <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                              </Button>
-                            )}
-                          </div>
-                          <div className="space-y-3 md:space-y-4">
-                            {displayedProducts.map((product, index) => {
-                        const availableStock = (product.serialNumbers || []).filter(s => !s.isUsed).length;
-                        
-                        return (
-                        <Card 
-                          key={product.id} 
-                          className="bg-white/90 backdrop-blur-xl shadow-lg border-2 border-l-0 border-r-0 md:border-l-2 md:border-r-2 border-white/60 hover:shadow-xl transition-all duration-300 group animate-in fade-in slide-in-from-bottom dark:bg-gray-900/90 dark:border-gray-800 mx-0 rounded-none md:rounded-lg"
-                          style={{ animationDelay: `${index * 50}ms` }}
-                        >
-                          <CardContent className="p-0">
-                            <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-4 md:p-4">
-                              {/* Top Section: Image and Info (Mobile Full Width) */}
-                              <div className="flex items-start gap-3 p-3 md:p-0 md:flex-1">
-                                {/* Small Product Image */}
-                                <div className="relative overflow-hidden rounded-lg flex-shrink-0">
-                                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-purple-400/0 group-hover:from-blue-400/20 group-hover:to-purple-400/20 transition-all duration-300 z-10"></div>
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                                  />
-                                </div>
-                                
-                                {/* Product Info */}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start gap-2 mb-0.5 md:mb-1">
-                                    <Badge variant="outline" className="px-1.5 md:px-2 py-0.5 text-xs tracking-wide bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-none flex-shrink-0 dark:from-blue-950 dark:to-purple-950 dark:text-blue-400">
-                                      {product.category}
-                                    </Badge>
-                                    {availableStock > 0 && (
-                                      <Badge variant="outline" className="hidden md:inline-flex px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800">
-                                        {availableStock} in stock
-                                      </Badge>
-                                    )}
-                                    {availableStock === 0 && (
-                                      <Badge variant="outline" className="hidden md:inline-flex px-1.5 py-0.5 text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
-                                        Out of stock
-                                      </Badge>
-                                    )} 
-                                  </div>
-                                  <h3 className="font-bold text-sm md:text-base lg:text-lg mb-0.5 md:mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-400 dark:to-purple-400 truncate md:whitespace-normal">{product.name}</h3>
-                                  {/* Desktop-only stock line under product name to avoid name overflow */}
-                                  {availableStock > 0 ? (
-                                    <div className="hidden md:block mt-1">
-                                      <Badge variant="outline" className="text-[11px] px-1.5 py-0.5 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800">
-                                        {availableStock} in stock
-                                      </Badge>
-                                    </div>
-                                  ) : (
-                                    <div className="hidden md:block mt-1">
-                                      <Badge variant="outline" className="text-[11px] px-1.5 py-0.5 bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800">
-                                        Out of stock
-                                      </Badge>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                {/* Price (Mobile) - moved to buy button area to avoid duplication */}
-                                <div className="hidden" />
-                              </div>
-
-                              {/* Description (Mobile Full Width) */}
-                              <div className="px-3 pb-3 md:hidden">
-                                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-5">{product.description}</p>
-                              </div>
-
-                              {/* Desktop Layout: Description, Button */}
-                              <div className="hidden md:flex md:items-center md:gap-4 md:flex-1">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-5 flex-1">{product.description}</p>
-                                <div className="text-right flex-shrink-0">
-                                  <Button 
-                                    onClick={() => handleBuyClick(product)}
-                                    disabled={availableStock === 0}
-                                    className={`h-10 px-6 ${availableStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500'} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg`}
-                                  >
-                                    <ShoppingCart className="h-4 w-4 mr-2" />
-                                    {availableStock === 0 ? 'Out of Stock' : 'Buy Now'}
-                                  </Button>
-                                </div>
-                              </div>
-
-                              {/* Buy Button and Price (Mobile Full Width) */}
-                              <div className="px-3 pb-3 md:p-0 md:flex-shrink-0 md:hidden flex items-center justify-between gap-2">
-                                <Button 
-                                  onClick={() => handleBuyClick(product)}
-                                  disabled={availableStock === 0}
-                                  className={`h-8 px-3 ${availableStock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500'} text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg text-xs`}
-                                >
-                                  <ShoppingCart className="h-3 w-3 mr-1" />
-                                  {availableStock === 0 ? 'Out of Stock' : 'Buy Now'}
-                                </Button>
-                                <div className="flex flex-col items-end">
-                                  <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300">
-                                    ₦{product.price.toFixed(2)}
-                                  </span>
-                                  {availableStock > 0 ? (
-                                    <Badge variant="outline" className="mt-1 px-1.5 py-0.5 text-[10px] bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800 block">
-                                      {availableStock} in stock
-                                    </Badge>
-                                  ) : (
-                                    <Badge variant="outline" className="mt-1 px-1.5 py-0.5 text-[10px] bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800 block">
-                                      Out of stock
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        );
-                      })}
-                    </div>
-                        </>
-                      );
-                    })()}
-                  </div>
+                  renderCategoryBlock(activeCategory)
                 )}
               </div>
             </div>
