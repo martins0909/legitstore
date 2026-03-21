@@ -849,7 +849,7 @@ app.post("/api/payments/ercas/credit", async (req: Request, res: Response) => {
       const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
       const pending = await Payment.findOne({ 
         user: realUser._id, 
-        method: "ercas", 
+        method: { $in: ["ercas", "ercaspay"] }, 
         status: { $ne: "success" },
         isCredited: false,
         createdAt: { $gte: thirtyMinsAgo } 

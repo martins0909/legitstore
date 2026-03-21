@@ -15,6 +15,58 @@ const ercaspay = new Ercaspay({
   secretKey: ECRS_SECRET_KEY || '',
 });
 
+const normalizeGatewayReference = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const cleaned = value.split('?')[0].split('&')[0].trim();
+  return cleaned.length > 0 ? cleaned : undefined;
+};
+
+const resolveGatewayReference = (payload: Record<string, any>): string | undefined => {
+  return normalizeGatewayReference(
+    payload.transactionReference
+      || payload.transactionRef
+      || payload.reference
+      || payload.paymentReference
+      || payload?.data?.transactionReference
+      || payload?.data?.transactionRef
+      || payload?.data?.reference
+      || payload?.data?.paymentReference,
+  );
+};
+
+const resolveCustomerEmail = (payload: Record<string, any>): string | undefined => {
+  const email = payload.customerEmail || payload?.data?.customer?.email || payload?.data?.customerEmail;
+  return typeof email === 'string' && email.trim().length > 0 ? email.trim() : undefined;
+};
+
+async function resolveUserRecord(userId?: string, email?: string, fallbackLocalId?: string) {
+  const { User } = await import('../models');
+
+  for (const candidate of [userId, fallbackLocalId]) {
+    if (!candidate || typeof candidate !== 'string') {
+      continue;
+    }
+
+    try {
+      const foundUser = await User.findById(candidate).exec();
+      if (foundUser) {
+        return foundUser;
+      }
+    } catch {
+      // Ignore malformed ids and continue to other strategies.
+    }
+  }
+
+  if (email) {
+    return User.findOne({ email }).exec();
+  }
+
+  return null;
+}
+
 /**
  * POST /api/payments/create-session
  * Creates a new payment checkout session with Ercaspay
@@ -86,7 +138,9 @@ router.post('/create-session', async (req, res) => {
       // Try to record a pending payment in DB (best-effort; don't block response)
       try {
         const { Payment } = await import('../models');
+        const resolvedUser = await resolveUserRecord(userId, email, userId);
         await Payment.create({
+          user: resolvedUser?._id,
           userLocalId: (transactionData as any).metadata?.userId,
           email: transactionData.customerEmail,
           amount: Number(transactionData.amount) || 0,
@@ -94,6 +148,7 @@ router.post('/create-session', async (req, res) => {
           status: 'pending',
           reference: paymentReference,
           transactionReference: transactionReference || undefined,
+          isCredited: false,
         });
       } catch (e) {
         console.warn('Payment DB record (pending) failed:', (e as Error).message);
@@ -224,10 +279,9 @@ router.get('/verify', async (req, res) => {
 router.post('/webhook', async (req, res) => {
   try {
     const evt = req.body || {};
-    const reference: string | undefined = evt.transactionReference || evt.reference || evt.transactionRef || evt?.data?.reference;
-    const statusRaw: string = (evt.status || evt.event || evt?.data?.status || '').toString().toLowerCase();
+    const reference = resolveGatewayReference(evt);
     const metadata = evt.metadata || evt?.data?.metadata || {};
-    const email = evt.customerEmail || evt?.data?.customer?.email || undefined;
+    const email = resolveCustomerEmail(evt);
 
     if (!reference) {
       console.warn('Webhook without reference:', evt);
@@ -239,22 +293,61 @@ router.post('/webhook', async (req, res) => {
     if (verifyResp.requestSuccessful && verifyResp.responseBody) {
       const code = verifyResp.responseCode;
       const success = code === 'success';
-      const amt = Number(verifyResp.responseBody.amount || 0);
+      const responseBody = verifyResp.responseBody as Record<string, any>;
+      const amt = Number(responseBody.amount || 0);
+      const paymentReference = normalizeGatewayReference(responseBody.paymentReference || responseBody.reference || reference);
+      const transactionReference = normalizeGatewayReference(
+        responseBody.transactionReference || responseBody.transactionRef || reference,
+      );
+
       try {
-        const { Payment } = await import('../models');
-        await Payment.findOneAndUpdate(
-          { $or: [{ transactionReference: reference }, { reference }] },
-          {
-            userLocalId: metadata?.userId,
-            email,
-            amount: isNaN(amt) ? 0 : amt,
-            method: 'ercaspay',
-            status: success ? 'completed' : 'failed',
-            transactionReference: reference,
-            reference: verifyResp.responseBody.paymentReference || undefined,
-          },
-          { upsert: true }
+        const { Payment, User } = await import('../models');
+        const existingPayment = await Payment.findOne({
+          $or: [
+            { transactionReference: transactionReference },
+            { reference: transactionReference },
+            { transactionReference: paymentReference },
+            { reference: paymentReference },
+          ],
+        }).exec();
+
+        const resolvedUser = await resolveUserRecord(
+          metadata?.userId,
+          email,
+          existingPayment?.userLocalId,
         );
+
+        const payment = existingPayment || new Payment({
+          method: 'ercaspay',
+          status: 'pending',
+          isCredited: false,
+        });
+
+        payment.user = resolvedUser?._id;
+        payment.userLocalId = metadata?.userId || payment.userLocalId;
+        payment.email = email || payment.email;
+        payment.amount = isNaN(amt) ? payment.amount || 0 : amt;
+        payment.method = 'ercaspay';
+        payment.status = success ? 'completed' : 'failed';
+        payment.transactionReference = transactionReference || payment.transactionReference;
+        payment.reference = paymentReference || payment.reference;
+
+        if (success && resolvedUser && !payment.isCredited) {
+          await User.findByIdAndUpdate(
+            resolvedUser._id,
+            { $inc: { balance: payment.amount } },
+            { new: true },
+          ).exec();
+          payment.isCredited = true;
+          console.log('Webhook credited wallet', {
+            userId: String(resolvedUser._id),
+            amount: payment.amount,
+            reference: payment.reference,
+            transactionReference: payment.transactionReference,
+          });
+        }
+
+        await payment.save();
       } catch (e) {
         console.error('Failed to upsert Payment from webhook:', (e as Error).message);
       }
