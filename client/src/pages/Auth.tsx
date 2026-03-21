@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Mail, Lock, User, ArrowRight, Shield } from "lucide-react";
 import { apiFetch, catalogAPI, catalogCategoriesAPI, warmBackend } from "@/lib/api";
 import logo from "@/assets/imagebackground.png";
+import heroBackground from "@/assets/navbarbanner.jfif";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -159,11 +160,18 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-hidden transition-colors duration-300">
-      {/* Animated gradient orbs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+    <div className="relative min-h-screen overflow-hidden px-6 py-12 transition-colors duration-300">
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroBackground})` }}
+      />
+      <div className="absolute inset-0 bg-blue-950/62 mix-blend-multiply" />
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-950/28 via-blue-900/18 to-blue-950/26" />
+      <div className="absolute top-0 left-0 h-96 w-96 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl animate-pulse" />
+      <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-gradient-to-br from-purple-400/20 to-pink-400/20 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-gradient-to-br from-pink-400/15 to-blue-400/15 blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+
+      <div className="relative z-10 flex min-h-[calc(100vh-6rem)] items-center justify-center">
       
       <div className="w-full max-w-md relative z-10">
         {/* Header with logo */}
@@ -176,12 +184,12 @@ const Auth = () => {
             />
           </div>
           <h1 
-            className="text-4xl md:text-5xl font-bold text-blue-700 dark:text-blue-400 mb-3"
+            className="mb-3 text-4xl font-bold text-white drop-shadow-2xl md:text-5xl"
             style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' }}
           >
             Welcome
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">Your trusted marketplace for authentic accounts</p>
+          <p className="text-lg text-blue-50">Your trusted marketplace for authentic accounts</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full animate-in fade-in slide-in-from-bottom duration-700">
@@ -415,6 +423,7 @@ const Auth = () => {
             Back to Home
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );
