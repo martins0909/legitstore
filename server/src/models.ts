@@ -211,6 +211,11 @@ const PurchaseHistorySchema = new Schema<IPurchaseHistory>({
   purchaseDate: { type: Date, default: Date.now },
 });
 
+// Indexes to support admin sorting/searching at scale
+PurchaseHistorySchema.index({ purchaseDate: -1 });
+PurchaseHistorySchema.index({ email: 1, purchaseDate: -1 });
+PurchaseHistorySchema.index({ userId: 1, purchaseDate: -1 });
+
 export const Cart = mongoose.model<ICart>("Cart", CartSchema);
 export const Payment = mongoose.model<IPayment>("Payment", PaymentSchema);
 export const User = mongoose.model<IUser>("User", UserSchema);

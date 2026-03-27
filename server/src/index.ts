@@ -118,6 +118,16 @@ async function start() {
       await CatalogCategory.insertMany(defaultCategories);
       console.log("Default categories seeded to database");
     }
+
+    // Ensure indexes needed for Buy History queries (important for Atlas scale)
+    try {
+      await PurchaseHistory.collection.createIndex({ purchaseDate: -1 });
+      await PurchaseHistory.collection.createIndex({ email: 1, purchaseDate: -1 });
+      await PurchaseHistory.collection.createIndex({ userId: 1, purchaseDate: -1 });
+      console.log("PurchaseHistory indexes ensured");
+    } catch (e) {
+      console.warn("Failed to ensure PurchaseHistory indexes:", e);
+    }
     
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server listening on all interfaces, port ${PORT}`);
@@ -756,8 +766,26 @@ app.get("/api/purchase-history", requireAdmin, async (req: Request, res: Respons
       // Using regex enables admin to type partial email and see matches
       filter.email = { $regex: email.trim(), $options: "i" };
     }
-    const items = await PurchaseHistory.find(filter).sort({ purchaseDate: -1 }).lean();
-    res.json(items);
+    try {
+      const items = await PurchaseHistory.find(filter).sort({ purchaseDate: -1 }).lean();
+      res.json(items);
+      return;
+    } catch (err: any) {
+      // If the collection is large and indexes are still building/missing, Mongo can exceed the 32MB in-memory sort cap.
+      // Fall back to aggregation with allowDiskUse to avoid a hard 500.
+      const code = err?.code;
+      const codeName = err?.codeName;
+      const msg = typeof err?.message === "string" ? err.message : "";
+      const isSortMemoryError = code === 292 || codeName === "QueryExceededMemoryLimitNoDiskUseAllowed" || msg.includes("Sort exceeded memory limit");
+      if (!isSortMemoryError) throw err;
+
+      const items = await PurchaseHistory.aggregate([
+        { $match: filter },
+        { $sort: { purchaseDate: -1 } },
+      ]).allowDiskUse(true);
+      res.json(items);
+      return;
+    }
   } catch (err) {
     console.error("Error fetching all purchase history:", err);
     res.status(500).json({ error: "Failed to fetch purchase history" });

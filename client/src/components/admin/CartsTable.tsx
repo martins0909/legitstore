@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { purchaseHistoryAPI, type PurchaseHistory as ApiPurchaseHistory } from "@/lib/api";
 import { Search } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 // Align with API type to avoid mismatches
 type PurchaseHistory = ApiPurchaseHistory;
@@ -11,6 +22,8 @@ export default function CartsTable({ token }: { token: string }) {
   const [error, setError] = useState<string | null>(null);
   const [searchEmail, setSearchEmail] = useState("");
   const [searching, setSearching] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseHistory | null>(null);
 
   async function loadData(emailFilter?: string) {
     setLoading(true);
@@ -40,6 +53,11 @@ export default function CartsTable({ token }: { token: string }) {
     if (searchEmail.trim().length === 0) return;
     setSearchEmail("");
     loadData();
+  }
+
+  function openDetails(purchase: PurchaseHistory) {
+    setSelectedPurchase(purchase);
+    setDetailsOpen(true);
   }
 
   if (loading) return <div className="p-4 text-center text-gray-600 dark:text-gray-400">Loading purchase history...</div>;
@@ -98,6 +116,7 @@ export default function CartsTable({ token }: { token: string }) {
               <th className="p-3 md:p-4 text-sm md:text-base text-gray-700 dark:text-gray-300 font-semibold">Price</th>
               <th className="p-3 md:p-4 text-sm md:text-base text-gray-700 dark:text-gray-300 font-semibold">Total</th>
               <th className="p-3 md:p-4 text-sm md:text-base text-gray-700 dark:text-gray-300 font-semibold">Date</th>
+              <th className="p-3 md:p-4 text-sm md:text-base text-gray-700 dark:text-gray-300 font-semibold">Details</th>
             </tr>
           </thead>
           <tbody>
@@ -112,12 +131,32 @@ export default function CartsTable({ token }: { token: string }) {
                   <td className="p-3 md:p-4 text-sm md:text-base text-gray-800 dark:text-gray-200">₦{(p.price || 0).toFixed(2)}</td>
                   <td className="p-3 md:p-4 text-sm md:text-base text-gray-800 dark:text-gray-200 font-semibold">₦{total.toFixed(2)}</td>
                   <td className="p-3 md:p-4 text-xs md:text-sm text-gray-800 dark:text-gray-200">{p.purchaseDate ? new Date(p.purchaseDate).toLocaleString() : "—"}</td>
+                  <td className="p-3 md:p-4 text-sm md:text-base">
+                    <Button variant="outline" size="sm" onClick={() => openDetails(p)}>
+                      View description
+                    </Button>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+
+      <AlertDialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Purchase details</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-wrap">
+              {selectedPurchase?.description?.trim()?.length ? selectedPurchase.description : "No description available for this purchase."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setDetailsOpen(false)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
