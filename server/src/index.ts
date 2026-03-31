@@ -530,7 +530,7 @@ app.get("/api/health", (req: Request, res: Response) => {
 // Get all catalog products
 app.get("/api/catalog", async (req: Request, res: Response) => {
   try {
-    const products = await CatalogProduct.find().select('-image -serialNumbers').lean();
+    const products = await CatalogProduct.find().select('-image').lean();
     res.json(products);
   } catch (err) {
     console.error("Error fetching catalog products:", err);
