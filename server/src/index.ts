@@ -367,18 +367,39 @@ app.get("/api/carts", requireAdmin, async (req: Request, res: Response) => {
 // Products
 app.get("/api/products", async (req: Request, res: Response) => {
   try {
-    const products = await Product.find().lean();
-    // Hide items from non-admin users
     const isAdmin = req.headers.authorization?.startsWith("Bearer ");
-    if (!isAdmin) {
-      // Remove items array for regular users
-      const sanitized = products.map(p => ({ ...p, items: [] }));
-      return res.json(sanitized);
-    }
+    const projection = isAdmin ? '-imageUrl' : '-imageUrl -items';
+    const products = await Product.find().select(projection).lean();
     res.json(products);
   } catch (err) {
     console.error("Error fetching products:", err);
     res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
+// Get product image
+app.get("/api/products/:id/image", async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findById(req.params.id).select('imageUrl').lean();
+    if (!product || !product.imageUrl) {
+      return res.status(404).send("Image not found");
+    }
+
+    const matches = product.imageUrl.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+      const buffer = Buffer.from(matches[2], 'base64');
+      res.set('Content-Type', matches[1]);
+      res.set('Cache-Control', 'public, max-age=31536000');
+      return res.send(buffer);
+    }
+    
+    // Fallback if not base64
+    if (product.imageUrl.startsWith("http")) return res.redirect(product.imageUrl);
+    res.send(product.imageUrl);
+
+  } catch (err) {
+    console.error("Error fetching product image:", err);
+    res.status(500).json({ error: "Failed to fetch image" });
   }
 });
 
@@ -509,11 +530,37 @@ app.get("/api/health", (req: Request, res: Response) => {
 // Get all catalog products
 app.get("/api/catalog", async (req: Request, res: Response) => {
   try {
-    const products = await CatalogProduct.find().lean();
+    const products = await CatalogProduct.find().select('-image -serialNumbers').lean();
     res.json(products);
   } catch (err) {
     console.error("Error fetching catalog products:", err);
     res.status(500).json({ error: "Failed to fetch catalog products" });
+  }
+});
+
+// Get catalog product image
+app.get("/api/catalog/:id/image", async (req: Request, res: Response) => {
+  try {
+    const product = await CatalogProduct.findOne({ id: req.params.id }).select('image').lean();
+    if (!product || !product.image) {
+      return res.status(404).send("Image not found");
+    }
+
+    const matches = product.image.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+      const buffer = Buffer.from(matches[2], 'base64');
+      res.set('Content-Type', matches[1]);
+      res.set('Cache-Control', 'public, max-age=31536000');
+      return res.send(buffer);
+    }
+    
+    // Fallback if not base64
+    if (product.image.startsWith("http")) return res.redirect(product.image);
+    res.send(product.image);
+
+  } catch (err) {
+    console.error("Error fetching catalog product image:", err);
+    res.status(500).json({ error: "Failed to fetch image" });
   }
 });
 

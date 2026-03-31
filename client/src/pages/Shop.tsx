@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI } from "@/lib/api";
+import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
 import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon } from "lucide-react";
 import bannerImg from "@/assets/banner.jpg";
 import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus } from "lucide-react";
@@ -404,7 +404,9 @@ const Shop = () => {
   const categoriesWithProducts = categories.filter(cat => cat !== "All" && groupedProducts[cat]?.length > 0);
   const shopCategoryMenuItems = categoriesWithProducts.map((category) => ({
     name: category,
-    image: groupedProducts[category]?.[0]?.image || bannerImg,
+    image: groupedProducts[category]?.[0] ? 
+           (groupedProducts[category][0].image || `${API_BASE}/api/catalog/${groupedProducts[category][0].id}/image`) : 
+           bannerImg,
     productCount: groupedProducts[category]?.length || 0,
   }));
   const completedDeposits = depositHistory.filter((entry) => {
@@ -484,7 +486,7 @@ const Shop = () => {
           <div className="flex min-w-0 flex-1 items-start gap-3">
             <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900 md:h-12 md:w-12">
               <img
-                src={product.image}
+                src={product.image || `${API_BASE}/api/catalog/${product.id}/image`}
                 alt={product.name}
                 className="h-full w-full object-cover"
                 loading="lazy"
@@ -984,7 +986,7 @@ const Shop = () => {
           {purchaseSummaryData && (
             <div className="space-y-4 text-slate-900 dark:text-slate-100">
               <div className="flex items-center gap-3">
-                <img src={purchaseSummaryData.product?.image} alt={purchaseSummaryData.product?.name} className="h-16 w-16 rounded-lg border border-slate-200 object-contain dark:border-white/10" />
+                <img src={purchaseSummaryData.product?.image || (purchaseSummaryData.product?.id ? `${API_BASE}/api/catalog/${purchaseSummaryData.product.id}/image` : "")} alt={purchaseSummaryData.product?.name} className="h-16 w-16 rounded-lg border border-slate-200 object-contain dark:border-white/10" />
                 <div>
                   <div className="text-lg font-bold">{purchaseSummaryData.product?.name}</div>
                   <div className="text-sm text-gray-500 dark:text-slate-400">{purchaseSummaryData.product?.category}</div>
@@ -1271,7 +1273,7 @@ const Shop = () => {
               <div className="flex justify-center">
                 <div className="relative overflow-hidden rounded-xl shadow-md">
                   <img
-                    src={selectedProduct.image}
+                    src={selectedProduct.image || `${API_BASE}/api/catalog/${selectedProduct.id}/image`}
                     alt={selectedProduct.name}
                     className="w-20 h-20 md:w-28 md:h-28 object-cover rounded-xl"
                   />
@@ -1417,7 +1419,7 @@ const Shop = () => {
                       {/* Product Image */}
                       <div className="relative overflow-hidden rounded-lg flex-shrink-0">
                         <img
-                          src={item.image}
+                          src={item.image || (item.productId ? `${API_BASE}/api/catalog/${item.productId}/image` : "")}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
@@ -1595,3 +1597,7 @@ const Shop = () => {
 };
 
 export default Shop;
+
+
+
+

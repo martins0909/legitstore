@@ -1,4 +1,4 @@
-import { catalogAPI, catalogCategoriesAPI } from "@/lib/api";
+import { catalogAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -330,9 +330,7 @@ const Index = () => {
                             <div className="flex min-w-0 flex-1 items-start gap-3">
                               <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900 md:h-12 md:w-12">
                                 <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="h-full w-full object-cover"
+                                    src={product.image || `${API_BASE}/api/catalog/${product.id}/image`}
                                   loading="lazy"
                                 />
                               </div>
