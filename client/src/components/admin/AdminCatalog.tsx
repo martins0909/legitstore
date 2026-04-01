@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { catalogAPI, catalogCategoriesAPI } from "@/lib/api";
+import { catalogAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
 
 interface SerialNumber {
   id: string;
@@ -74,6 +74,8 @@ export default function AdminCatalog() {
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [editPrice, setEditPrice] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editImage, setEditImage] = useState("");
+  const [uploadingEditImage, setUploadingEditImage] = useState(false);
   const [editingInProgress, setEditingInProgress] = useState(false);
 
   // Derived lookup
@@ -206,6 +208,32 @@ export default function AdminCatalog() {
       // fall back silently; defaults remain
       console.error("Error loading categories", e);
     }
+  };
+
+  const handleEditImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size should be less than 2MB");
+      return;
+    }
+
+    setUploadingEditImage(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setEditImage(event.target?.result as string);
+      setUploadingEditImage(false);
+      toast.success("New product image attached");
+    };
+    reader.onerror = () => {
+      toast.error("Failed to process image");
+      setUploadingEditImage(false);
+    };
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -525,6 +553,7 @@ export default function AdminCatalog() {
     setEditingProduct(product);
     setEditPrice(product.price.toString());
     setEditDescription(product.description);
+    setEditImage("");
     setEditDialogOpen(true);
   };
 
@@ -543,29 +572,37 @@ export default function AdminCatalog() {
     }
 
     setEditingInProgress(true);
-    
+
     try {
-      await catalogAPI.update(editingProduct.id, {
+      const payload: Partial<CatalogProduct> = {
         price,
-        description: editDescription.trim()
-      });
+        description: editDescription.trim(),
+      };
       
+      if (editImage) {
+        payload.image = editImage;
+      }
+
+      await catalogAPI.update(editingProduct.id, payload);
+
       setProducts(prev => prev.map(p => {
         if (p.id === editingProduct.id) {
           return {
             ...p,
             price,
-            description: editDescription.trim()
+            description: editDescription.trim(),
+            ...(editImage ? { image: editImage } : {})
           };
         }
         return p;
       }));
-      
+
       toast.success("Product updated successfully");
       setEditDialogOpen(false);
       setEditingProduct(null);
       setEditPrice("");
       setEditDescription("");
+      setEditImage("");
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("Failed to update product. Please check your connection.");
@@ -929,11 +966,43 @@ export default function AdminCatalog() {
               Edit Product - {editingProduct?.name}
             </DialogTitle>
             <DialogDescription>
-              Update the price and description for this product.
+              Update the price, description, and image for this product.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Product Image (Optional)</label>
+                <div className="flex gap-4 items-start">
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+                    <img 
+                      src={editImage || (editingProduct ? `${API_BASE}/api/catalog/${editingProduct.id}/image` : "")} 
+                      alt="Product Preview" 
+                      className="w-full h-full object-contain" 
+                    />
+                    {editImage && (
+                      <button
+                        onClick={() => setEditImage("")}
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md transition-colors"
+                        title="Revert to current image"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2 relative">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditImageUpload}
+                      disabled={uploadingEditImage}
+                      className="cursor-pointer"
+                    />
+                    {uploadingEditImage && <p className="text-sm text-blue-600 mt-1">Processing image...</p>}
+                    <p className="text-xs text-gray-500 mt-1">Leave blank to keep existing image.</p>
+                  </div>
+                </div>
+              </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Price (₦)</label>
               <Input
@@ -984,3 +1053,5 @@ export default function AdminCatalog() {
     </div>
   );
 }
+
+
