@@ -234,6 +234,7 @@ export default function AdminCatalog() {
       toast.error("Failed to process image");
       setUploadingEditImage(false);
     };
+    reader.readAsDataURL(file);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
