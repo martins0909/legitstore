@@ -755,7 +755,7 @@ export default function AdminCatalog() {
                       {isExpanded && (
                       <div className="space-y-3">
                         {displayedProducts.map(prod => {
-                  const availableSerials = (prod.serialNumbers || []).filter(s => !s.isUsed).length;
+                  const availableSerials = prod.serialNumbers ? prod.serialNumbers.filter(s => !s.isUsed).length : (prod.stockCount || 0);
                   const usedSerials = (prod.serialNumbers || []).filter(s => s.isUsed).length;
                   
                   return (
@@ -891,7 +891,7 @@ export default function AdminCatalog() {
                 </h4>
                 <div className="flex gap-2 text-xs">
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    {selectedProduct?.serialNumbers?.filter(s => !s.isUsed).length || 0} Available
+                    {selectedProduct?.serialNumbers ? selectedProduct.serialNumbers.filter(s => !s.isUsed).length : (selectedProduct?.stockCount || 0)} Available
                   </Badge>
                   <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
                     {selectedProduct?.serialNumbers?.filter(s => s.isUsed).length || 0} Used

@@ -272,16 +272,11 @@ const Shop = () => {
     }
 
     try {
-      // Let the backend handle secure serial number assignment!
-      const assignedSerialNumbers: string[] = [];
-
       // Complete purchase via backend (deducts balance, updates product, creates history)
-      // Backend handles both MongoDB _id and custom UUID id fields, so always send serialUpdates
       const result = await purchaseHistoryAPI.completePurchase({
         userId: user.id,
         productId: selectedProduct.id,
         quantity: purchaseQuantity,
-        serialUpdates: updatedSerials,
         purchaseData: {
           userId: user.id,
           email: user.email,
@@ -292,9 +287,10 @@ const Shop = () => {
           image: selectedProduct.image,
           category: selectedProduct.category,
           quantity: purchaseQuantity,
-          assignedSerials: assignedSerialNumbers
         }
       });
+
+      const assignedSerialNumbers = result.purchase?.assignedSerials || [];
 
       // Update local state with new balance from backend
       const updatedUser: User = { ...user, balance: result.newBalance };

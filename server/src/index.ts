@@ -781,101 +781,119 @@ app.post("/api/purchase-history", async (req: Request, res: Response) => {
 
 // Complete purchase (deduct balance, update product, create history)
 app.post("/api/purchase/complete", async (req: Request, res: Response) => {
-  try {
-    const { userId, productId, quantity, serialUpdates, purchaseData } = req.body;
-    
-    console.log("Purchase request received:", { userId, productId, quantity });
-    
-    if (!userId || !productId || !quantity || !purchaseData) {
-      console.error("Missing required fields:", { userId, productId, quantity, purchaseData });
-      return res.status(400).json({ error: "Missing required fields" });
-    }
+    try {
+      const { userId, productId, quantity, purchaseData } = req.body;
 
-    // Get user and check balance
-    const user = await User.findById(userId).exec();
-    if (!user) {
-      console.error("User not found:", userId);
-      return res.status(404).json({ error: "User not found" });
-    }
+      console.log("Purchase request received:", { userId, productId, quantity });
 
-    const totalPrice = purchaseData.price * quantity;
-    if ((user.balance || 0) < totalPrice) {
-      console.error("Insufficient balance:", { balance: user.balance, required: totalPrice });
-      return res.status(400).json({ error: "Insufficient balance" });
-    }
-
-    console.log("Creating purchase history...");
-    // Create purchase history first
-    const purchase = new PurchaseHistory({
-      userId: purchaseData.userId,
-      email: purchaseData.email,
-      productId: purchaseData.productId,
-      name: purchaseData.name,
-      description: purchaseData.description,
-      price: purchaseData.price,
-      image: purchaseData.image,
-      category: purchaseData.category,
-      quantity: purchaseData.quantity,
-      assignedSerials: purchaseData.assignedSerials || [],
-    });
-    await purchase.save();
-    console.log("Purchase history created successfully");
-
-    // Update product serial numbers if provided (support both _id and custom id field)
-    let updatedCatalogProduct: any = null;
-    if (serialUpdates && serialUpdates.length > 0) {
-      console.log("Updating product serial numbers...");
-      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(productId);
-      try {
-        if (isValidObjectId) {
-          // Try _id first
-          updatedCatalogProduct = await CatalogProduct.findByIdAndUpdate(
-            productId,
-            { serialNumbers: serialUpdates },
-            { new: true }
-          ).exec();
-        }
-        // If not valid ObjectId or not found via _id, fall back to custom id field
-        if (!updatedCatalogProduct) {
-          updatedCatalogProduct = await CatalogProduct.findOneAndUpdate(
-            { id: productId },
-            { serialNumbers: serialUpdates },
-            { new: true }
-          ).exec();
-        }
-        if (updatedCatalogProduct) {
-          console.log("Serial numbers updated successfully for catalog product", updatedCatalogProduct.id || updatedCatalogProduct._id);
-        } else {
-          console.log("Catalog product not found for serial update", productId);
-        }
-      } catch (e) {
-        console.error("Error updating serial numbers", e);
+      if (!userId || !productId || !quantity || !purchaseData) {
+        console.error("Missing required fields:", { userId, productId, quantity, purchaseData });
+        return res.status(400).json({ error: "Missing required fields" });
       }
+
+      // Get user and check balance
+      const user = await User.findById(userId).exec();
+      if (!user) {
+        console.error("User not found:", userId);
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const totalPrice = purchaseData.price * quantity;
+      if ((user.balance || 0) < totalPrice) {
+        console.error("Insufficient balance:", { balance: user.balance, required: totalPrice });
+        return res.status(400).json({ error: "Insufficient balance" });
+      }
+
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(productId);
+      let catalogProduct = null;
+      
+      if (isValidObjectId) {
+        catalogProduct = await CatalogProduct.findById(productId).exec();
+      }
+      if (!catalogProduct) {
+        catalogProduct = await CatalogProduct.findOne({ id: productId }).exec();
+      }
+
+      if (!catalogProduct) {
+        console.error("Product not found:", productId);
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      // Check available stock
+      const availableSerials = (catalogProduct.serialNumbers || []).filter(s => !s.isUsed);
+      if (availableSerials.length < quantity) {
+        return res.status(400).json({ error: `Not enough stock. Only ${availableSerials.length} units remaining.` });
+      }
+
+      // Assign the serial numbers securely on backend
+      const serialsToAssign = availableSerials.slice(0, quantity);
+      const assignedSerialNumbers = serialsToAssign.map(s => s.serial);
+
+      // Update the product's serials list indicating they are now used
+      const updatedSerialsList = (catalogProduct.serialNumbers || []).map(s => {
+        if (serialsToAssign.some(assigned => assigned.id === s.id)) {
+          return {
+            id: s.id,
+            serial: s.serial,
+            isUsed: true,
+            usedBy: user.email,
+            usedAt: new Date().toISOString()
+          };
+        }
+        return {
+           id: s.id,
+           serial: s.serial,
+           isUsed: s.isUsed,
+           usedBy: s.usedBy,
+           usedAt: s.usedAt
+        };
+      });
+
+      // Avoid modifying the array directly if Mongoose doesn't detect the change easily
+      catalogProduct.serialNumbers = updatedSerialsList;
+      await catalogProduct.save();
+      console.log(`Serial numbers updated successfully for catalog product ${catalogProduct.id || catalogProduct._id}`);
+
+      console.log("Creating purchase history...");
+      // Create purchase history first
+      const purchase = new PurchaseHistory({
+        userId: purchaseData.userId,
+        email: purchaseData.email,
+        productId: catalogProduct.id || catalogProduct._id?.toString(),
+        name: purchaseData.name,
+        description: purchaseData.description,
+        price: purchaseData.price,
+        image: purchaseData.image,
+        category: purchaseData.category,
+        quantity: quantity,
+        assignedSerials: assignedSerialNumbers,
+      });
+      await purchase.save();
+      console.log("Purchase history created successfully");
+
+      // Deduct balance from user last (after everything else succeeds)
+      console.log("Deducting balance...");
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { balance: -totalPrice } },
+        { new: true }
+      ).exec();
+      console.log("Balance deducted successfully. New balance:", updatedUser?.balance);
+
+      res.json({
+        success: true,
+        newBalance: updatedUser?.balance || 0,
+        purchase,
+        updatedProduct: {
+          id: catalogProduct.id || catalogProduct._id?.toString(),
+          stockCount: (catalogProduct.serialNumbers || []).filter(s => !s.isUsed).length
+        }
+      });
+    } catch (err) {
+      console.error("Error completing purchase:", err);
+      res.status(500).json({ error: "Failed to complete purchase", details: err instanceof Error ? err.message : String(err) });
     }
-
-    // Deduct balance from user last (after everything else succeeds)
-    console.log("Deducting balance...");
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $inc: { balance: -totalPrice } },
-      { new: true }
-    ).exec();
-    console.log("Balance deducted successfully. New balance:", updatedUser?.balance);
-
-    res.json({
-      success: true,
-      newBalance: updatedUser?.balance || 0,
-      purchase,
-      updatedProduct: updatedCatalogProduct ? {
-        id: updatedCatalogProduct.id || updatedCatalogProduct._id?.toString(),
-        serialNumbers: updatedCatalogProduct.serialNumbers || []
-      } : null
-    });
-  } catch (err) {
-    console.error("Error completing purchase:", err);
-    res.status(500).json({ error: "Failed to complete purchase", details: err instanceof Error ? err.message : String(err) });
-  }
-});
+  });
 
 // Get all purchase history (admin only) - shows ALL purchases including user-deleted for business records
 app.get("/api/purchase-history", requireAdmin, async (req: Request, res: Response) => {
