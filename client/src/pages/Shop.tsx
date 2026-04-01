@@ -287,6 +287,7 @@ const Shop = () => {
           image: selectedProduct.image,
           category: selectedProduct.category,
           quantity: purchaseQuantity,
+          assignedSerials: []
         }
       });
 

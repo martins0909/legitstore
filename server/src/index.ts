@@ -837,7 +837,7 @@ app.post("/api/purchase/complete", async (req: Request, res: Response) => {
             serial: s.serial,
             isUsed: true,
             usedBy: user.email,
-            usedAt: new Date().toISOString()
+            usedAt: new Date()
           };
         }
         return {
