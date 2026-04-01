@@ -45,16 +45,14 @@ const Index = () => {
         }
 
         setHomeProducts(
-          products.map(({ id, name, price, image, description, category, serialNumbers }) => ({
+          products.map(({ id, name, price, image, description, category, stockCount, serialNumbers }) => ({
             id,
             name,
             price,
             image,
             description,
             category,
-            stockCount: Array.isArray(serialNumbers)
-              ? serialNumbers.filter((serial) => !serial.isUsed).length
-              : 0,
+            stockCount: stockCount ?? (Array.isArray(serialNumbers) ? serialNumbers.filter((serial) => !serial.isUsed).length : 0),
           })),
         );
         setHomeCategories(categories.map((category) => category.name));

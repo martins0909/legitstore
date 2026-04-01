@@ -29,11 +29,13 @@ interface Product {
   description: string;
   category: string;
   serialNumbers?: SerialNumber[];
+  stockCount?: number;
 }
 
 interface PurchaseHistoryItem extends Product {
   purchaseDate: string;
   quantity: number;
+  productId?: string;
   assignedSerials?: string[]; // Array of serial numbers assigned to this purchase
 }
 
@@ -260,29 +262,18 @@ const Shop = () => {
     setIsPurchasing(true);
 
     // Check if enough serial numbers are available
-    const availableSerials = (selectedProduct.serialNumbers || []).filter(s => !s.isUsed);
-    if (availableSerials.length < purchaseQuantity) {
-      toast.error(`Only ${availableSerials.length} units available in stock.`);
+    const availableStock = selectedProduct.serialNumbers 
+        ? selectedProduct.serialNumbers.filter(s => !s.isUsed).length 
+        : (selectedProduct.stockCount || 0);
+
+    if (availableStock < purchaseQuantity) {
+      toast.error(`Only ${availableStock} units available in stock.`);
       return;
     }
 
     try {
-      // Assign serial numbers to this purchase
-      const serialsToAssign = availableSerials.slice(0, purchaseQuantity);
-      const assignedSerialNumbers = serialsToAssign.map(s => s.serial);
-
-      // Update product serials to mark as used
-      const updatedSerials = (selectedProduct.serialNumbers || []).map(s => {
-        if (serialsToAssign.some(assigned => assigned.id === s.id)) {
-          return {
-            ...s,
-            isUsed: true,
-            usedBy: user.email,
-            usedAt: new Date().toISOString()
-          };
-        }
-        return s;
-      });
+      // Let the backend handle secure serial number assignment!
+      const assignedSerialNumbers: string[] = [];
 
       // Complete purchase via backend (deducts balance, updates product, creates history)
       // Backend handles both MongoDB _id and custom UUID id fields, so always send serialUpdates
@@ -314,13 +305,13 @@ const Shop = () => {
       const updatedUsers = usersRaw.map(u => u.id === user.id ? updatedUser : u);
       localStorage.setItem("users", JSON.stringify(updatedUsers));
 
-      // Update local products state using backend authoritative serialNumbers if provided
-      const backendSerials = result.updatedProduct?.serialNumbers;
+      // Update local products state using authoritative backend response
       const updatedProducts = products.map(p => {
         if (p.id === selectedProduct.id) {
+          const updatedStock = (result as any).updatedProduct?.stockCount;
           return {
             ...p,
-            serialNumbers: backendSerials && backendSerials.length > 0 ? backendSerials : updatedSerials
+            stockCount: updatedStock !== undefined ? updatedStock : p.stockCount
           };
         }
         return p;
@@ -477,7 +468,7 @@ const Shop = () => {
   const formatPrice = (price: number) => (Number.isInteger(price) ? price : price.toFixed(2));
 
   const renderShopProductRow = (product: Product) => {
-    const availableStock = (product.serialNumbers || []).filter((serial) => !serial.isUsed).length;
+    const availableStock = product.serialNumbers ? product.serialNumbers.filter(serial => !serial.isUsed).length : (product.stockCount || 0);
     const isOutOfStock = availableStock === 0;
 
     return (
@@ -1321,17 +1312,17 @@ const Shop = () => {
                       size="sm"
                       className="h-8 w-8 p-0"
                       onClick={() => {
-                        const maxStock = (selectedProduct.serialNumbers || []).filter(s => !s.isUsed).length;
+                        const maxStock = selectedProduct.serialNumbers ? selectedProduct.serialNumbers.filter(s => !s.isUsed).length : (selectedProduct.stockCount || 0);
                         setPurchaseQuantity(Math.min(maxStock, purchaseQuantity + 1));
                       }}
-                      disabled={purchaseQuantity >= ((selectedProduct.serialNumbers || []).filter(s => !s.isUsed).length)}
+                      disabled={purchaseQuantity >= (selectedProduct.serialNumbers ? selectedProduct.serialNumbers.filter(s => !s.isUsed).length : (selectedProduct.stockCount || 0))}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
-                  {((selectedProduct.serialNumbers || []).filter(s => !s.isUsed).length)} units available
+                  {selectedProduct.serialNumbers ? selectedProduct.serialNumbers.filter(s => !s.isUsed).length : (selectedProduct.stockCount || 0)} units available
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-800">

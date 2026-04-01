@@ -530,32 +530,106 @@ app.get("/api/health", (req: Request, res: Response) => {
 // Get all catalog products
 app.get("/api/catalog", async (req: Request, res: Response) => {
   try {
-    const products = await CatalogProduct.find().select('-image').lean();
-    res.json(products);
-  } catch (err) {
-    console.error("Error fetching catalog products:", err);
-    res.status(500).json({ error: "Failed to fetch catalog products" });
-  }
-});
+      let isAdmin = false;
+      const auth = req.headers.authorization;
+      if (auth) {
+        const parts = auth.split(" ");
+        const token = parts.length === 2 ? parts[1] : parts[0];
+        try {
+          const payload = jwt.verify(token, JWT_SECRET) as JwtAdminPayload;
+          if (payload && payload.adminId) isAdmin = true;
+        } catch (err) {}
+      }
 
-// Get catalog product image
-app.get("/api/catalog/:id/image", async (req: Request, res: Response) => {
-  try {
-    const product = await CatalogProduct.findOne({ id: req.params.id }).select('image').lean();
-    if (!product || !product.image) {
-      return res.status(404).send("Image not found");
+      let safeProducts;
+        if (isAdmin) {
+          safeProducts = await CatalogProduct.find().select("-image").lean();
+        } else {
+          const aggregated = await CatalogProduct.aggregate([
+            {
+              $project: {
+                _id: 1,
+                id: 1,
+                name: 1,
+                description: 1,
+                price: 1,
+                category: 1,
+                stockCount: {
+                  $size: {
+                    $filter: {
+                      input: { $ifNull: ["$serialNumbers", []] },
+                      as: "s",
+                      cond: { $ne: ["$$s.isUsed", true] }
+                    }
+                  }
+                }
+              }
+            }
+          ]);
+          safeProducts = aggregated.map(p => {
+             const newP = { ...p };
+             if (!newP.id && newP._id) {
+               newP.id = newP._id.toString();
+             }
+             return newP;
+          });
+        }
+        
+        res.json(safeProducts);
+    } catch (err) {
+      console.error("Error fetching catalog products:", err);
+      res.status(500).json({ error: "Failed to fetch catalog products" });
     }
+  });
 
-    const matches = product.image.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
-    if (matches && matches.length === 3) {
-      const buffer = Buffer.from(matches[2], 'base64');
-      res.set('Content-Type', matches[1]);
-      res.set('Cache-Control', 'public, max-age=31536000');
-      return res.send(buffer);
-    }
-    
-    // Fallback if not base64
-    if (product.image.startsWith("http")) return res.redirect(product.image);
+  // In-memory cache for catalog product images
+  const imageCache = new Map<string, { buffer?: Buffer, contentType?: string, fallback?: string, isUrl?: boolean }>();
+
+  // Get catalog product image
+  app.get("/api/catalog/:id/image", async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+
+      // 1. Check if we already have it in memory
+      if (imageCache.has(id)) {
+        const cached = imageCache.get(id)!;
+        if (cached.buffer && cached.contentType) {
+          res.set('Content-Type', cached.contentType);
+          res.set('Cache-Control', 'public, max-age=31536000');
+          return res.send(cached.buffer);
+        } else if (cached.isUrl && cached.fallback) {
+          return res.redirect(cached.fallback);
+        } else if (cached.fallback) {
+          return res.send(cached.fallback);
+        }
+      }
+
+      // 2. Not in memory, so query the database
+      const product = await CatalogProduct.findOne({ id }).select('image').lean();
+      if (!product || !product.image) {
+        return res.status(404).send("Image not found");
+      }
+
+      // 3. Process and Cache the image for next time
+      const matches = product.image.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        const buffer = Buffer.from(matches[2], 'base64');
+        const contentType = matches[1];
+        
+        imageCache.set(id, { buffer, contentType });
+        
+        res.set('Content-Type', contentType);
+        res.set('Cache-Control', 'public, max-age=31536000');
+        return res.send(buffer);
+      }
+
+      // Fallback if not base64
+      if (product.image.startsWith("http")) {
+        imageCache.set(id, { fallback: product.image, isUrl: true });
+        return res.redirect(product.image);
+      }
+      
+      imageCache.set(id, { fallback: product.image });
     res.send(product.image);
 
   } catch (err) {
