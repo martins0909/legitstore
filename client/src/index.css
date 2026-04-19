@@ -129,7 +129,7 @@ All colors MUST be HSL.
   }
 
   body::after {
-    background: linear-gradient(180deg, hsl(220 30% 4%), hsl(220 30% 3%));
+    background: radial-gradient(circle at 50% 0%, #1e293ba6 0%, #020617 40%, #000000 100%);
     opacity: 0;
   }
 

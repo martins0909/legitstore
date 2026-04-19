@@ -6,8 +6,9 @@ import heroBackground from "@/assets/navbarbanner.jfif";
 import logo from "@/assets/imagebackground.png";
 import customerImage from "@/assets/customer.jpg";
 import boardImage from "@/assets/board.jpg";
-import { ShoppingBag, Shield, Zap, CreditCard, Globe2, Users } from "lucide-react";
+import { ShoppingBag, Shield, Zap, CreditCard, Globe2, Users, Star, Quote } from "lucide-react";
 import { memo, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 interface CatalogProduct {
   id: string;
@@ -18,6 +19,30 @@ interface CatalogProduct {
   category: string;
   stockCount: number;
 }
+
+const testimonials = [
+  {
+    name: "James T.",
+    product: "USA Aged Facebook Ads Account",
+    review: "The accounts provided were top quality and perfectly aged. Delivered instantly and I haven't faced any restrictions since running ads. Literally the best service I've found so far.",
+    rating: 5,
+    date: "1 day ago"
+  },
+  {
+    name: "Cynthia M.",
+    product: "Premium TikTok Agency Account",
+    review: "I was skeptical at first, but everything worked out smoothly. Support was top-tier, answering all my questions before the purchase. Will definitely be utilizing Legitstorez.com for my agency again.",
+    rating: 5,
+    date: "3 days ago"
+  },
+  {
+    name: "Michael K.",
+    product: "Verified Twitter/X Blueprint",
+    review: "Fast deposit via Ercas and immediate delivery of the product. The verification held up perfectly, exactly as described in the product details. Saves me so much time.",
+    rating: 5,
+    date: "1 week ago"
+  },
+];
 
 /**
  * Index Page – LegitStore Landing Page
@@ -84,7 +109,7 @@ const Index = () => {
     .filter((category) => (homeProductsByCategory[category] || []).length > 0);
 
   return (
-  <main className="relative flex min-h-screen flex-col overflow-hidden bg-white transition-colors duration-300 dark:bg-[#020409]">
+  <main className="relative flex min-h-screen flex-col overflow-hidden bg-white transition-colors duration-300 dark:bg-transparent">
       
       {/* 🧭 Navbar */}
       <Navbar />
@@ -104,7 +129,13 @@ const Index = () => {
         <div className="container mx-auto relative z-10">
           <div className="max-w-4xl mx-auto">
             {/* 📝 Hero Text */}
-            <div className="space-y-6 rounded-[2rem] border border-white/20 bg-white/12 px-6 py-10 backdrop-blur-sm md:space-y-8 md:px-10 md:py-14 animate-in fade-in slide-in-from-left duration-700 text-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="space-y-6 rounded-[2rem] border border-white/20 bg-white/12 px-6 py-10 backdrop-blur-sm md:space-y-8 md:px-10 md:py-14 text-center"
+            >
               <div className="space-y-3 md:space-y-4">
                 <h3 className="text-lg font-medium text-blue-100 md:text-xl lg:text-2xl">
                   Welcome to
@@ -147,18 +178,24 @@ const Index = () => {
                   Learn More
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* ℹ️ About Section */}
-      <section id="about" className="bg-white px-2 py-16 transition-colors duration-300 dark:bg-[#04070d] md:px-6 md:py-24" aria-labelledby="about-title">
+      <section id="about" className="px-2 py-16 transition-colors duration-300 bg-white dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-slate-800 dark:via-[#020617] dark:to-black dark:text-white md:px-6 md:py-24" aria-labelledby="about-title">
         <div className="w-full md:container md:mx-auto">
           <div className="grid items-start gap-8 md:grid-cols-[1.04fr_0.96fr] md:gap-10">
-            <div className="order-2 space-y-5 animate-in fade-in slide-in-from-left duration-700 md:order-1">
-              <div className="space-y-4 rounded-[2rem] border border-slate-200 bg-white p-6 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/76 md:p-8">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-blue-700 dark:border-white/10 dark:bg-slate-900/80 dark:text-blue-300">
+            <motion.div 
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              className="order-2 space-y-5 md:order-1"
+            >
+              <div className="space-y-4 rounded-[2rem] border border-slate-200 bg-white/70 p-6 transition-all duration-300 dark:border-white/10 dark:bg-slate-900/40 md:p-8 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-1">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-blue-700 dark:border-white/10 dark:bg-slate-800/60 dark:text-white backdrop-blur-sm">
                   <Users className="h-4 w-4" />
                   Trusted Marketplace
                 </div>
@@ -166,42 +203,42 @@ const Index = () => {
                 <div>
                   <h2
                     id="about-title"
-                    className={`text-3xl font-bold leading-tight md:text-5xl lg:text-6xl ${accentTextClass}`}
+                    className={`text-3xl font-bold leading-tight md:text-5xl lg:text-6xl text-blue-700 dark:text-white`}
                     style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' }}
                   >
                     About LegitStore
                   </h2>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 dark:text-slate-300 md:text-lg">
+                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 dark:text-slate-200 md:text-lg">
                     We offer a wide range of accounts tailored to various needs. Professional social media growth services built for users who want dependable digital products and a clean buying experience.
                   </p>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/75">
-                    <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white/60 p-4 transition-all duration-300 dark:border-white/10 dark:bg-slate-800/30 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-slate-800/50 hover:shadow-md">
+                    <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-white">
                       <Globe2 className="h-4 w-4" />
                       Social Platforms
                     </div>
-                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-200">
                       Foreign & local Facebook, Instagram, TikTok, YouTube, Twitter, Discord accounts, old email, Twitch, and many more.
                     </p>
                   </div>
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/75">
-                    <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-white/60 p-4 transition-all duration-300 dark:border-white/10 dark:bg-slate-800/30 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-slate-800/50 hover:shadow-md">
+                    <div className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-white">
                       <Shield className="h-4 w-4" />
                       Verification Support
                     </div>
-                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-200">
                       Virtual numbers for WhatsApp, Telegram, SMS, and OTP verification to support fast and smooth account setup.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-[1.6rem] border border-slate-200 bg-white px-5 py-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/72">
-                  <p className="text-sm leading-7 text-slate-700 dark:text-slate-300 md:text-base">
+                <div className="rounded-[1.6rem] border border-slate-200 bg-white/60 px-5 py-5 transition-all duration-300 dark:border-white/10 dark:bg-slate-800/30 backdrop-blur-sm hover:shadow-md">
+                  <p className="text-sm leading-7 text-slate-700 dark:text-slate-200 md:text-base">
                     We will help you gain more followers and boost your account. With thousands of satisfied customers worldwide, we have built a reputation for reliability, quality, and customer satisfaction.
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300 md:text-base">
+                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200 md:text-base">
                     Join our community today and experience the difference.
                   </p>
                 </div>
@@ -210,72 +247,78 @@ const Index = () => {
               <div className="grid grid-cols-2 gap-4 md:gap-5">
               {[
                 {
-                  icon: <ShoppingBag className="h-6 w-6 md:h-8 md:w-8" />,
+                  icon: <ShoppingBag className="h-6 w-6 md:h-8 md:w-8 text-blue-700 dark:text-white" />,
                   title: "Wide Product Range",
                   desc: "Facebook, Instagram, TikTok, YouTube, Twitter and more in one place.",
                 },
                 {
-                  icon: <Shield className="h-6 w-6 md:h-8 md:w-8" />,
+                  icon: <Shield className="h-6 w-6 md:h-8 md:w-8 text-blue-700 dark:text-white" />,
                   title: "Verification Tools",
                   desc: "WhatsApp, Telegram, SMS and OTP virtual numbers for smooth verification.",
                 },
                 {
-                  icon: <Zap className="h-6 w-6 md:h-8 md:w-8" />,
+                  icon: <Zap className="h-6 w-6 md:h-8 md:w-8 text-blue-700 dark:text-white" />,
                   title: "Fast Fulfilment",
                   desc: "Bright, simple checkout with delivery designed for quick account access.",
                 },
                 {
-                  icon: <CreditCard className="h-6 w-6 md:h-8 md:w-8" />,
+                  icon: <CreditCard className="h-6 w-6 md:h-8 md:w-8 text-blue-700 dark:text-white" />,
                   title: "Trusted Payments",
                   desc: "Reliable funding options and a service flow built around customer confidence.",
                 },
               ].map((feature) => (
                 <article
                   key={feature.title}
-                  className="rounded-[1.5rem] border border-slate-200 bg-white p-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/72"
+                  className="rounded-[1.5rem] border border-slate-200 bg-white/70 p-5 transition-all duration-300 dark:border-white/10 dark:bg-slate-800/30 backdrop-blur-sm hover:-translate-y-1 hover:shadow-lg dark:hover:bg-slate-800/50"
                 >
-                  <div className="mb-4 inline-flex rounded-2xl bg-blue-50 p-3 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                  <div className="mb-4 inline-flex rounded-2xl bg-blue-50 p-3 text-blue-700 dark:bg-slate-800/80 dark:text-blue-300">
                     {feature.icon}
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 md:text-lg">{feature.title}</h3>
-                  <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-300 md:text-sm">{feature.desc}</p>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white md:text-lg">{feature.title}</h3>
+                  <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-slate-200 md:text-sm">{feature.desc}</p>
                 </article>
               ))}
             </div>
-            </div>
+            </motion.div>
 
-            <div className="order-1 grid gap-4 animate-in fade-in slide-in-from-right duration-700 md:order-2 md:grid-rows-[1.15fr_0.85fr]">
-              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/78">
+            <motion.div 
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              className="order-1 grid gap-4 md:order-2 md:grid-rows-[1.15fr_0.85fr]"
+            >
+              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition-colors duration-300 dark:border-white/10 dark:bg-slate-800/40">
                 <img
                   src={customerImage}
                   alt="Satisfied LegitStore customers"
                   className="h-64 w-full object-cover md:h-full"
                 />
                 <div className="border-t border-slate-200 px-5 py-4 dark:border-white/10">
-                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-white">
                     <Users className="h-4 w-4" />
                     Customer Satisfaction
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
                     Thousands of customers trust LegitStore for reliable service, quality products, and consistent support.
                   </p>
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
-                <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/78">
+                <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white transition-colors duration-300 dark:border-white/10 dark:bg-slate-800/40">
                   <img
                     src={boardImage}
                     alt="LegitStore team working around the clock for customer satisfaction"
                     className="h-56 w-full object-cover md:h-full"
                   />
                 </div>
-                <div className="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/74">
-                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700">
+                <div className="rounded-[2rem] border border-slate-200 bg-white px-5 py-5 transition-colors duration-300 dark:border-white/10 dark:bg-slate-800/40">
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 dark:text-white">
                     <Zap className="h-4 w-4" />
                     Always Available
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300">
+                  <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-200">
                     We work 24/7 to ensure customer satisfaction, fast responses, and a service experience that feels dependable every time.
                   </p>
                   <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300">
@@ -283,7 +326,7 @@ const Index = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -291,7 +334,13 @@ const Index = () => {
       {/* 🛍 Category Banner */}
       <section id="categories" className="relative py-16 md:py-24" aria-labelledby="categories-title">
         <div className="relative z-10 w-full max-w-none">
-          <header className="mb-5 px-6 text-center animate-in fade-in slide-in-from-top duration-700 md:mb-8">
+          <motion.header 
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mb-5 px-6 text-center md:mb-8"
+          >
             <h2 
               id="categories-title" 
               className={`text-3xl md:text-5xl lg:text-6xl font-bold ${accentTextClass}`}
@@ -299,14 +348,21 @@ const Index = () => {
             >
               LOGs
             </h2>
-          </header>
+          </motion.header>
 
           <div className="space-y-6 md:space-y-8">
-            {displayedHomeCategories.length > 0 ? displayedHomeCategories.map((category) => {
+            {displayedHomeCategories.length > 0 ? displayedHomeCategories.map((category, index) => {
               const products = homeProductsByCategory[category] || [];
 
               return (
-                <div key={category} className="border-y border-slate-200 bg-[#f8fbff] dark:border-slate-800 dark:bg-slate-900/70">
+                <motion.div 
+                  key={category} 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="border-y border-slate-200 bg-[#f8fbff] dark:border-slate-800 dark:bg-slate-900/70"
+                >
                   <div className="bg-blue-700 px-4 py-2 text-white md:px-6 md:py-3">
                     <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                       <div>
@@ -368,22 +424,96 @@ const Index = () => {
                       );
                     })}
                   </div>
-                </div>
+                </motion.div>
               );
             }) : (
-              <div className="border-y border-slate-200 bg-[#f8fbff] px-6 py-10 text-center shadow-[0_18px_50px_rgba(15,23,42,0.04)] md:mx-6 md:rounded-[1.5rem] md:border dark:border-slate-800 dark:bg-slate-900/70">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="border-y border-slate-200 bg-[#f8fbff] px-6 py-10 text-center shadow-[0_18px_50px_rgba(15,23,42,0.04)] md:mx-6 md:rounded-[1.5rem] md:border dark:border-slate-800 dark:bg-slate-900/70"
+              >
                 <h3 className={`text-2xl font-bold ${accentTextClass}`}>Categories will appear here</h3>
                 <p className="mt-3 text-base text-slate-600 dark:text-slate-300">
                   Add products and categories in the admin area to populate this banner automatically.
                 </p>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
       </section>
 
+      {/* ⭐ Customer Trust and Testimonies */}
+      <section className="relative z-10 px-4 py-16 md:px-6 md:py-24 mx-auto max-w-7xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-orange-600 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400 mb-4">
+            <Star className="h-3.5 w-3.5 fill-current" />
+            CUSTOMER TRUST
+          </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-5xl lg:text-6xl dark:text-white">
+            Loved by Thousands
+          </h2>
+          <p className="mt-4 text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            Don't just take our word for it. See what our customers are saying about our premium accounts, fast delivery, and unmatched support.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {testimonials.map((testimonial, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.15 }}
+              className="relative flex flex-col rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60 md:p-8 backdrop-blur-sm group"
+            >
+              <Quote className="absolute top-6 right-6 h-10 w-10 text-blue-100 dark:text-blue-900/40 transition-transform group-hover:scale-110" />
+              
+              <div className="flex items-center gap-1 mb-4">
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <Star 
+                    key={starIndex} 
+                    className={`h-4 w-4 md:h-5 md:w-5 ${starIndex < testimonial.rating ? "text-orange-400 fill-orange-400" : "text-slate-300 dark:text-slate-700"}`} 
+                  />
+                ))}
+              </div>
+              
+              <div className="flex-1">
+                <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300">
+                  "{testimonial.review}"
+                </p>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col">
+                  <span className="font-bold text-slate-900 dark:text-white">{testimonial.name}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mt-1">
+                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Bought: {testimonial.product}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{testimonial.date}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* 📜 Footer */}
-      <footer className="relative z-10 mx-5 mb-5 mt-auto rounded-2xl border border-slate-200 bg-white px-6 py-12 dark:border-white/10 dark:bg-black/55 md:mx-6 md:mb-6">
+      <motion.footer 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="relative z-10 mx-5 mb-5 mt-auto rounded-2xl border border-slate-200 bg-white px-6 py-12 dark:border-white/10 dark:bg-black/55 md:mx-6 md:mb-6"
+      >
         <div className="container mx-auto flex flex-col items-center text-center">
           <img
             src={logo}
@@ -401,7 +531,7 @@ const Index = () => {
             © 2026 LegitStore. All rights reserved.
           </p>
         </div>
-      </footer>
+      </motion.footer>
 
       {/* Floating Social Support Icons */}
       {/* <div className="fixed bottom-8 left-6 z-50">

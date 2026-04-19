@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
-import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon } from "lucide-react";
+import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon, Activity } from "lucide-react";
 import bannerImg from "@/assets/banner.jpg";
 import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 // Removed demo product assets; shop now shows only database products
 
 interface SerialNumber {
@@ -31,6 +32,30 @@ interface Product {
   serialNumbers?: SerialNumber[];
   stockCount?: number;
 }
+
+// --- Live Activity Implementation ---
+type ActivityAction = "buy" | "deposit";
+
+interface LiveActivity {
+  id: string;
+  user: string;
+  action: ActivityAction;
+  detail: string;
+  description?: string;
+  amount: number;
+  timestamp: number;
+  timeString: string;
+}
+
+const generateRandomUser = () => {
+  const names = ['kin', 'pre', 'had', 'con', 'jam', 'ola', 'sam', 'ada', 'chi', 'vic', 'lex', 'max', 'jon', 'ben'];
+  return names[Math.floor(Math.random() * names.length)] + '***';
+};
+
+const getRandomTimeAgo = () => {
+  const times = ["just now", "1 minute ago", "3 minutes ago", "5 minutes ago", "30 minutes ago", "2 hours ago", "yesterday"];
+  return times[Math.floor(Math.random() * times.length)];
+};
 
 interface PurchaseHistoryItem extends Product {
   purchaseDate: string;
@@ -79,6 +104,12 @@ const Shop = () => {
     createdAt: string;
     reference?: string;
   }>>([]);
+  
+  // Live Activities State
+  const [liveActivities, setLiveActivities] = useState<LiveActivity[]>([]);
+  // Add a tick state to force re-render components tracking timestamp formatTimeAgo every minute
+  const [, setTick] = useState(0);
+
   // Fetch deposit history (payments)
   const loadDepositHistory = async (userId: string) => {
     try {
@@ -369,6 +400,98 @@ const Shop = () => {
     }
   };
 
+  useEffect(() => {
+    // Generate initial live activities when products load
+    if (products.length > 0 && liveActivities.length === 0) {
+      const now = Date.now();
+      const initialActivities: LiveActivity[] = Array.from({ length: 6 }).map((_, i) => {
+        const isDeposit = Math.random() > 0.6;
+        const timeOffset = now - (Math.floor(Math.random() * 60) * 60000) - (i * 55 * 60000); // spread across random past hours
+        
+        let detail = "Ercas Pay";
+        let amount = Math.floor(Math.random() * 45000) + 1000;
+        let description = undefined;
+        
+        if (!isDeposit) {
+          const randomProduct = products[Math.floor(Math.random() * products.length)];
+          detail = randomProduct.name;
+          amount = randomProduct.price;
+          // Add a short snippet of the product description
+          description = randomProduct.description ? randomProduct.description.substring(0, 40) + "..." : "Premium quality social account";
+        }
+        
+        return {
+          id: `init-${i}-${Math.random()}`,
+          user: generateRandomUser(),
+          action: isDeposit ? "deposit" : "buy",
+          detail,
+          description,
+          amount,
+          timestamp: timeOffset,
+          timeString: getRandomTimeAgo()
+        };
+      });
+      // push to top properly, sorted descending time
+      setLiveActivities(initialActivities.sort((a,b) => b.timestamp - a.timestamp));
+    }
+  }, [products]);
+
+  useEffect(() => {
+    let tickInterval: ReturnType<typeof setInterval>;
+    let generatorTimer: ReturnType<typeof setTimeout>;
+
+    // Ticker to refresh timeago strings every minute
+    tickInterval = setInterval(() => setTick(t => t + 1), 60000);
+    
+    // Auto-update loop (push a new activity constantly between 3-7 seconds to look busy)
+    const runGenerator = () => {
+      const nextDelay = Math.floor(Math.random() * 4000) + 3000; 
+      
+      generatorTimer = setTimeout(() => {
+        if (products.length > 0) {
+          setLiveActivities(prev => {
+            const isDeposit = Math.random() > 0.7; // 30% chance deposit, 70% chance buy
+            let detail = "Ercas Pay";
+            let amount = Math.floor(Math.random() * 45000) + 1000;
+            let description = undefined;
+            
+            if (!isDeposit && products.length > 0) {
+              const randomProduct = products[Math.floor(Math.random() * products.length)];
+              detail = randomProduct.name;
+              amount = randomProduct.price;
+              description = randomProduct.description ? randomProduct.description.substring(0, 40) + "..." : "Premium quality social account";
+            }
+
+            const newActivity: LiveActivity = {
+              id: `live-${Date.now()}-${Math.random()}`,
+              user: generateRandomUser(),
+              action: isDeposit ? "deposit" : "buy",
+              detail,
+              description,
+              amount,
+              timestamp: Date.now(),
+              timeString: getRandomTimeAgo()
+            };
+
+            // keep latest 6
+            const newArray = [newActivity, ...prev].slice(0, 6);
+            return newArray;
+          });
+        }
+        runGenerator(); // recursively call next one
+      }, nextDelay);
+    };
+
+    if (products.length > 0) {
+       runGenerator();
+    }
+    
+    return () => {
+      clearInterval(tickInterval);
+      clearTimeout(generatorTimer);
+    };
+  }, [products]);
+
   // Group products by category
   const filteredProducts = products.filter((product) => {
     if (!searchQuery) return true;
@@ -464,15 +587,22 @@ const Shop = () => {
 
   const formatPrice = (price: number) => (Number.isInteger(price) ? price : price.toFixed(2));
 
-  const renderShopProductRow = (product: Product) => {
+  const renderShopProductRow = (product: Product, index: number = 0) => {
     const availableStock = product.serialNumbers ? product.serialNumbers.filter(serial => !serial.isUsed).length : (product.stockCount || 0);
     const isOutOfStock = availableStock === 0;
 
     return (
-      <article key={product.id} className="border-t border-slate-200 px-4 py-3 first:border-t-0 md:px-6 dark:border-slate-800">
+      <motion.article 
+        key={product.id} 
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
+        className="border-t border-slate-200 px-4 py-3 first:border-t-0 md:px-6 dark:border-white/5"
+      >
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
           <div className="flex min-w-0 flex-1 items-start gap-3">
-            <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900 md:h-12 md:w-12">
+            <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900/40 md:h-12 md:w-12">
               <img
                 src={product.image || `${API_BASE}/api/catalog/${product.id}/image`}
                 alt={product.name}
@@ -489,15 +619,15 @@ const Shop = () => {
             </div>
           </div>
 
-          <div className="ml-auto grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 border-t border-slate-200 pt-3 text-center md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:border-t-0 md:pt-0 dark:border-slate-800">
+          <div className="ml-auto grid w-full max-w-[320px] grid-cols-[72px_minmax(92px,1fr)_78px] items-center justify-items-center gap-3 border-t border-slate-200 pt-3 text-center md:ml-0 md:min-w-[338px] md:w-auto md:grid-cols-[84px_110px_112px] md:gap-4 md:border-t-0 md:pt-0 dark:border-white/5">
             <div className="flex w-full justify-center">
-              <div className={`mt-1 inline-flex min-w-[66px] items-center justify-center rounded-full px-2.5 py-1 text-sm font-semibold ${isOutOfStock ? "bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"}`}>
+              <div className={`mt-1 inline-flex min-w-[66px] items-center justify-center rounded-full px-2.5 py-1 text-sm font-semibold ${isOutOfStock ? "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300"}`}>
                 {availableStock}pcx
               </div>
             </div>
 
             <div className="flex w-full justify-center">
-              <div className="mt-1 inline-flex min-w-[92px] items-center justify-center rounded-full bg-slate-100 px-2.5 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <div className="mt-1 inline-flex min-w-[92px] items-center justify-center rounded-full bg-slate-100 px-2.5 py-1 text-sm font-semibold text-slate-700 dark:bg-slate-800/40 dark:text-slate-200">
                 ₦{formatPrice(product.price)}
               </div>
             </div>
@@ -513,18 +643,26 @@ const Shop = () => {
             </div>
           </div>
         </div>
-      </article>
+      </motion.article>
     );
   };
 
-  const renderCategoryBlock = (category: string) => {
+  const renderCategoryBlock = (category: string, blockIndex: number = 0) => {
     const categoryProducts = groupedProducts[category] || [];
     const displayedProducts = getProductsToDisplay(category);
     const hasMore = categoryProducts.length > 5;
     const isExpanded = expandedCategories[category];
 
     return (
-      <div key={category} id={`category-${category}`} className="scroll-mt-24 border-y border-slate-200 bg-[#f8fbff] dark:border-slate-800 dark:bg-slate-900/70">
+      <motion.div 
+        key={category} 
+        id={`category-${category}`} 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5, delay: Math.min(blockIndex * 0.1, 0.4) }}
+        className="scroll-mt-24 border-y border-slate-200 bg-[#f8fbff] dark:border-white/5 dark:bg-black/20 backdrop-blur-md"
+      >
         <div className="bg-blue-700 px-4 py-2 text-white md:px-6 md:py-3">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
@@ -549,9 +687,9 @@ const Shop = () => {
         </div>
 
         <div>
-          {displayedProducts.map((product) => renderShopProductRow(product))}
+          {displayedProducts.map((product, idx) => renderShopProductRow(product, idx))}
         </div>
-      </div>
+      </motion.div>
     );
   };
 
@@ -839,7 +977,7 @@ const Shop = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 relative overflow-x-hidden md:overflow-hidden pb-28 md:pb-20 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-slate-800 dark:via-[#020617] dark:to-black dark:text-white relative overflow-x-hidden md:overflow-hidden pb-28 md:pb-20 transition-colors duration-300">
       {/* Animated gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -1083,10 +1221,16 @@ const Shop = () => {
 
       <div className="pt-24 relative z-10">
         {/* Banner Section with Welcome Badge - Full Width */}
-        <div className="relative mb-6 animate-in fade-in slide-in-from-top duration-500">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="relative mb-6"
+        >
           {/* Welcome badge positioned slightly above banner - smaller on mobile */}
           <div className="absolute -top-3 right-2 md:-top-4 md:right-6 z-10">
-            <div className="flex items-center gap-1 md:gap-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl px-2 py-1 md:px-4 md:py-2 rounded-full shadow-xl border-2 border-white/70 dark:border-gray-700">
+            <div className="flex items-center gap-1 md:gap-2 bg-white/90 dark:bg-white/5 backdrop-blur-xl px-2 py-1 md:px-4 md:py-2 rounded-full shadow-xl border-2 border-white/70 dark:border-white/5">
               <span className="text-xs md:text-base text-gray-700 dark:text-gray-300 font-medium">
                 {user.name || user.email.split('@')[0]}
               </span>
@@ -1124,19 +1268,31 @@ const Shop = () => {
               Click here to get ur sms number
             </a>
           </div>
-        </div>
+        </motion.div>
 
         <div className="px-0 md:px-6">
           <div className="w-full md:container md:mx-auto">
             
             {/* Header Section (subtitle only now, main title moved into banner) */}
-            <div className="text-center mb-8 md:mb-12 animate-in fade-in slide-in-from-top duration-700">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-8 md:mb-12"
+            >
               <p className="text-sm md:text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">Discover our curated collection of high-quality social media accounts</p>
-            </div>
+            </motion.div>
 
             {/* Wallet Section */}
             <div ref={walletSectionRef}>
-            <Card className="mb-6 md:mb-8 bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl border-2 border-white/60 dark:border-gray-800 animate-in fade-in slide-in-from-left duration-700">
+            <motion.div 
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+            >
+            <Card className="mb-6 md:mb-8 bg-white/90 dark:bg-black/20 backdrop-blur-xl shadow-2xl border-2 border-white/60 dark:border-white/5">
               <CardHeader className="pb-3 md:pb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2 md:gap-3">
@@ -1197,6 +1353,7 @@ const Shop = () => {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
             </div>
           </div>
         </div>
@@ -1208,14 +1365,25 @@ const Shop = () => {
             <div className="grid lg:grid-cols-1 gap-8">
               {/* Products Grid */}
               <div className="lg:col-span-1">
-                <h2 
+                <motion.h2 
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5 }}
                   className="text-2xl md:text-4xl lg:text-5xl font-bold mb-6 md:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 px-3 md:px-0"
                   style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' }}
                 >
                   Our Products
-                </h2>
+                </motion.h2>
                 {/* Category Filters */}
-                <div className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 animate-in fade-in slide-in-from-left duration-500 -ml-8 w-[calc(100%+4rem)] px-4 md:px-0 md:ml-0 md:w-full box-border">
+                {/* 
+                <motion.div 
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="flex flex-wrap gap-2 md:gap-3 mb-6 md:mb-8 -ml-8 w-[calc(100%+4rem)] px-4 md:px-0 md:ml-0 md:w-full box-border"
+                >
                   {categories.map(cat => (
                     <Button
                       key={cat}
@@ -1224,21 +1392,91 @@ const Shop = () => {
                         setActiveCategory(cat);
                         scrollToCategory(cat);
                       }}
-                      className={`rounded-full px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm font-semibold transition-all duration-300 shadow ${activeCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : 'bg-white/70 backdrop-blur border-2 border-white/60 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:bg-gray-900/70 dark:border-gray-800 dark:hover:from-gray-800 dark:hover:to-gray-800 dark:text-gray-300'}`}
+                      className={`rounded-full px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm font-semibold transition-all duration-300 shadow ${activeCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' : 'bg-white/70 backdrop-blur border-2 border-white/60 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:bg-white/5 dark:border-white/10 dark:hover:from-white/10 dark:hover:to-white/10 dark:text-gray-300'}`}
                     >
                       {cat}
                     </Button>
                   ))}
-                </div>
+                </motion.div>
+                */}
 
                 {/* Display products grouped by category */}
                 {activeCategory === "All" ? (
-                  <div className="space-y-8 md:space-y-12">{categoriesWithProducts.map((category) => renderCategoryBlock(category))}</div>
+                  <div className="space-y-8 md:space-y-12">{categoriesWithProducts.map((category, index) => renderCategoryBlock(category, index))}</div>
                 ) : (
                   renderCategoryBlock(activeCategory)
                 )}
               </div>
             </div>
+            
+            {/* Live Activity Section */}
+            {liveActivities.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6 }}
+                className="mt-12 md:mt-16 lg:col-span-1 border-t border-slate-200 dark:border-slate-800 pt-8 md:pt-10 pb-4"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </div>
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-700 to-slate-900 dark:from-slate-200 dark:to-white font-['Poppins']">
+                    RECENT ACTIVITY
+                  </h2>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-black/20 backdrop-blur-md overflow-hidden shadow-sm">
+                  <div className="grid grid-cols-[1.5fr_1fr_1fr] md:grid-cols-[1fr_2fr_1fr_1fr] bg-slate-50 dark:bg-white/5 px-3 md:px-6 py-3 text-[10px] md:text-sm font-semibold text-slate-500 dark:text-slate-300 tracking-wider">
+                    <div className="hidden md:block">USER</div>
+                    <div>ACTIVITY</div>
+                    <div className="text-center">AMOUNT</div>
+                    <div className="text-right">TIME</div>
+                  </div>
+                  
+                  <div className="flex flex-col relative overflow-hidden">
+                    <AnimatePresence initial={false}>
+                      {liveActivities.map((activity) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ type: "spring", bounce: 0.3, duration: 0.7 }}
+                        >
+                            <div className="grid grid-cols-[1.5fr_1fr_1fr] md:grid-cols-[1fr_2fr_1fr_1fr] items-center gap-1 md:gap-2 px-3 md:px-6 py-3 border-t border-slate-100 dark:border-white/5 text-xs md:text-sm bg-white dark:bg-transparent">
+                              <div className="hidden md:flex font-medium text-slate-900 dark:text-slate-200 truncate">
+                                {activity.user}
+                              </div>
+                              <div className="flex flex-col md:flex-row md:items-center md:gap-2 align-middle">
+                                <span className="md:hidden font-medium text-slate-900 dark:text-slate-200">{activity.user}</span>
+                                <span className="text-slate-600 dark:text-slate-300 line-clamp-1 break-all">
+                                  {activity.action === "buy" ? (
+                                    <>
+                                      bought <span className="font-semibold text-blue-600 dark:text-blue-400">{activity.detail}</span>
+                                      {activity.description && <span className="text-slate-400 dark:text-slate-500 hidden lg:inline"> - {activity.description}</span>}
+                                    </>
+                                  ) : (
+                                    <>deposited via <span className="font-semibold text-purple-600 dark:text-purple-400">{activity.detail}</span></>
+                                  )}
+                                </span>
+                              </div>
+                              <div className="text-center font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                                ₦{activity.amount.toLocaleString()}
+                              </div>
+                              <div className="text-right text-slate-500 dark:text-slate-400 whitespace-nowrap text-[10px] md:text-[11px] lg:text-xs font-medium">
+                                {activity.timeString}
+                              </div>
+                            </div>
+                          </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
@@ -1401,7 +1639,7 @@ const Shop = () => {
               </div>
             ) : (
               purchaseHistory.map((item, index) => (
-                <Card key={index} className="bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
+                <Card key={index} className="bg-white/80 dark:bg-black/20 border border-gray-200 dark:border-white/5 backdrop-blur-md">
                   <CardContent className="p-3">
                     <div className="flex items-start gap-3">
                       {/* Product Image */}
