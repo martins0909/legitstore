@@ -160,270 +160,260 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden px-6 py-12 transition-colors duration-300">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBackground})` }}
-      />
-      <div className="absolute inset-0 bg-blue-950/62 mix-blend-multiply" />
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-950/28 via-blue-900/18 to-blue-950/26" />
-      <div className="absolute top-0 left-0 h-96 w-96 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-gradient-to-br from-purple-400/20 to-pink-400/20 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-gradient-to-br from-pink-400/15 to-blue-400/15 blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
-
-      <div className="relative z-10 flex min-h-[calc(100vh-6rem)] items-center justify-center">
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-white dark:bg-slate-950 transition-colors duration-300">
       
-      <div className="w-full max-w-md relative z-10">
-        {/* Header with logo */}
-        <div className="text-center mb-8 animate-in fade-in slide-in-from-top duration-500">
-          <div className="inline-flex items-center justify-center mb-4">
-            <img 
-              src={logo} 
-              alt="Legit Store" 
-              className="h-20 w-auto drop-shadow-2xl"
-            />
+      {/* 🌌 Left Pane - Marketing / Branding */}
+      <div className="relative hidden md:flex md:w-1/2 lg:w-[45%] xl:w-[40%] flex-col justify-between overflow-hidden bg-slate-950 p-10 text-white shadow-2xl">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: `url(${heroBackground})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-950 via-blue-900/80 to-blue-950/40" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent opacity-80" />
+        
+        {/* Floating Shapes */}
+        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-blue-500/20 blur-[100px]" />
+        <div className="absolute top-1/2 right-0 translate-x-1/2 h-80 w-80 rounded-full bg-purple-500/20 blur-[80px]" />
+        
+        <div className="relative z-10 flex items-center gap-3 cursor-pointer group" onClick={() => navigate("/")}>
+          <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/20 group-hover:bg-white/20 transition-colors">
+            <img src={logo} alt="Legit Store" className="h-8 w-auto mix-blend-screen" />
           </div>
-          <h1 
-            className="mb-3 text-4xl font-bold text-white drop-shadow-2xl md:text-5xl"
-            style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' }}
-          >
-            Welcome
-          </h1>
-          <p className="text-lg text-blue-50">Your trusted marketplace for authentic accounts</p>
+          <span className="font-bold text-2xl tracking-tight">LegitStore</span>
         </div>
 
-        <Tabs defaultValue="signin" className="w-full animate-in fade-in slide-in-from-bottom duration-700">
-          <TabsList className="grid w-full grid-cols-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg p-1 h-12">
-            <TabsTrigger 
-              value="signin" 
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-300 font-medium dark:text-gray-300"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </TabsTrigger>
-            <TabsTrigger 
-              value="signup" 
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-300 font-medium dark:text-gray-300"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Sign Up
-            </TabsTrigger>
-          </TabsList>
+        <div className="relative z-10 mt-auto mb-10">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-blue-200 backdrop-blur-md shadow-inner">
+            <Shield className="h-3.5 w-3.5" />
+            100% Secure
+          </div>
+          <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6" style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, Arial' }}>
+            Unleash your social growth today.
+          </h1>
+          <p className="text-blue-100/80 text-lg max-w-md leading-relaxed">
+            Log in to access your dashboard, discover exclusive robust social accounts, and scale your digital assets all in one secure place.
+          </p>
           
-          <TabsContent value="signin" className="mt-6">
-            <Card className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl border-white/60 dark:border-gray-800 border-2 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30 pointer-events-none"></div>
-              <CardHeader className="relative space-y-1 pb-6">
-                <CardTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400">Sign In</CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">Enter your credentials to access your account</CardDescription>
-              </CardHeader>
-              <CardContent className="relative">
-                <form onSubmit={handleSignIn} className="space-y-5">
-                  <div className="space-y-2">
-                    <label htmlFor="signin-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-blue-600" />
-                      Email
-                    </label>
-                    <div className="relative group">
-                      <Input
-                        id="signin-email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={signInEmail}
-                        onChange={(e) => setSignInEmail(e.target.value)}
-                        required
-                        className="pl-11 h-12 border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 transition-all duration-300 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100"
-                      />
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
+          <div className="mt-12 flex items-center gap-4">
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-10 w-10 rounded-full border-2 border-blue-900 bg-slate-300 overflow-hidden">
+                   <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
+                </div>
+              ))}
+            </div>
+            <div className="text-sm font-medium text-blue-200">
+              Join <span className="text-white font-bold">50k+</span> users
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ⚡ Right Pane - Form */}
+      <div className="relative flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-24">
+        
+        {/* Mobile Header */}
+        <div className="absolute top-6 left-6 md:hidden flex items-center cursor-pointer z-20" onClick={() => navigate("/")}>
+          <img src={logo} alt="Legit Store" className="h-8 w-auto mr-2" />
+        </div>
+
+        <div className="absolute top-6 right-6 z-20">
+          <Button variant="ghost" className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 rounded-full h-10 px-4" onClick={() => navigate("/")}>
+            Back to Home
+          </Button>
+        </div>
+
+        <div className="mx-auto w-full max-w-sm xl:max-w-md relative z-10">
+          <div className="mb-10 text-center md:text-left">
+            <h2 className="text-3xl font-bold tracking-tight text-blue-600 dark:text-white mb-2">Get Started</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Enter your details below to continue your journey.</p>
+          </div>
+
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 p-1.5 mb-10 shadow-inner">
+              <TabsTrigger value="signin" className="rounded-lg h-10 font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-blue-400 transition-all">
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="rounded-lg h-10 font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-blue-400 transition-all">
+                Sign Up
+              </TabsTrigger>
+            </TabsList>
+            
+            {/* --- SIGN IN --- */}
+            <TabsContent value="signin" className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-0">
+              <form onSubmit={handleSignIn} className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="signin-email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Email Address
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="name@example.com"
+                      value={signInEmail}
+                      onChange={(e) => setSignInEmail(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
-                  <div className="space-y-2">
-                    <label htmlFor="signin-password" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="signin-password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Password
                     </label>
-                    <div className="relative group">
-                      <Input
-                        id="signin-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={signInPassword}
-                        onChange={(e) => setSignInPassword(e.target.value)}
-                        required
-                        className="pl-11 h-12 border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 transition-all duration-300 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100"
-                      />
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
-                  </div>
-                  <Button 
-                    type="submit"
-                    disabled={isSigningIn}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      {isSigningIn ? "Signing In..." : "Sign In"}
-                      {!isSigningIn && <ArrowRight className="w-4 h-4" />}
-                    </span>
-                  </Button>
-                  
-                  {showWakingMessage && (
-                    <div className="text-center text-sm text-blue-600 dark:text-blue-400 animate-pulse">
-                      Waking server... This takes a moment after inactivity
-                    </div>
-                  )}
-                  
-                  <div className="text-center pt-2">
                     <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="link" className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-                          Forgot Password?
-                        </Button>
+                        <button type="button" className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                          Forgot password?
+                        </button>
                       </DialogTrigger>
-                      <DialogContent className="bg-white/95 backdrop-blur-xl border-2 border-white/60 shadow-2xl dark:bg-gray-900/95 dark:border-gray-800">
+                      <DialogContent className="sm:max-w-md bg-white border-slate-200 shadow-2xl dark:bg-slate-950 dark:border-slate-800 rounded-2xl">
                         <DialogHeader>
-                          <DialogTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                            <Mail className="w-5 h-5 text-blue-600" />
-                            Reset Your Password
+                          <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <Lock className="w-5 h-5 text-blue-600" />
+                            Reset Password
                           </DialogTitle>
-                          <DialogDescription className="text-gray-600 dark:text-gray-400">
-                            Enter your email address and we'll send you a link to reset your password.
+                          <DialogDescription className="text-slate-500 dark:text-slate-400 pt-2">
+                            Enter your account email and we'll send you a recovery link.
                           </DialogDescription>
                         </DialogHeader>
-                        <form onSubmit={handleForgotPassword} className="space-y-5 mt-4">
+                        <form onSubmit={handleForgotPassword} className="space-y-5 mt-2">
                           <div className="space-y-2">
-                            <label htmlFor="reset-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-blue-600" />
+                            <label htmlFor="reset-email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                               Email Address
                             </label>
                             <div className="relative group">
                               <Input
                                 id="reset-email"
                                 type="email"
-                                placeholder="your@email.com"
+                                placeholder="name@example.com"
                                 value={resetEmail}
                                 onChange={(e) => setResetEmail(e.target.value)}
                                 required
-                                className="pl-11 h-12 border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 rounded-xl bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder:text-gray-500"
+                                className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-500 transition-all rounded-xl"
                               />
-                              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600" />
                             </div>
                           </div>
-                          <div className="flex gap-3">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="flex-1 h-11 rounded-xl border-2 hover:bg-gray-50 transition-all duration-300"
-                              onClick={() => setIsResetDialogOpen(false)}
-                            >
+                          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
+                            <Button type="button" variant="outline" className="h-11 rounded-xl sm:w-28 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800" onClick={() => setIsResetDialogOpen(false)}>
                               Cancel
                             </Button>
-                            <Button 
-                              type="submit" 
-                              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                            >
-                              Send Reset Link
+                            <Button type="submit" className="h-11 rounded-xl sm:w-36 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md shadow-blue-600/20">
+                              Send Link
                             </Button>
                           </div>
                         </form>
                       </DialogContent>
                     </Dialog>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="signup" className="mt-6">
-            <Card className="bg-white/95 backdrop-blur-xl shadow-2xl border-white/60 border-2 overflow-hidden dark:bg-gray-900/95 dark:border-gray-800">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-transparent to-pink-50/50 dark:from-purple-950/30 dark:via-transparent dark:to-pink-950/30 pointer-events-none"></div>
-              <CardHeader className="relative space-y-1 pb-6">
-                <CardTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400">Create Account</CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">Sign up to start your shopping journey</CardDescription>
-              </CardHeader>
-              <CardContent className="relative">
-                <form onSubmit={handleSignUp} className="space-y-5">
-                  <div className="space-y-2">
-                    <label htmlFor="signup-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <User className="w-4 h-4 text-blue-600" />
-                      Email
-                    </label>
-                    <div className="relative group">
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={signUpEmail}
-                        onChange={(e) => setSignUpEmail(e.target.value)}
-                        required
-                        className="pl-11 h-12 border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 rounded-xl bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder:text-gray-500"
-                      />
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
+                  <div className="relative group">
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={signInPassword}
+                      onChange={(e) => setSignInPassword(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
-                  <div className="space-y-2">
-                    <label htmlFor="signup-password" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-blue-600" />
-                      Password
-                    </label>
-                    <div className="relative group">
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={signUpPassword}
-                        onChange={(e) => setSignUpPassword(e.target.value)}
-                        required
-                        className="pl-11 h-12 border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 rounded-xl bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder:text-gray-500"
-                      />
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
+                </div>
+
+                <Button 
+                  type="submit"
+                  disabled={isSigningIn}
+                  className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-bold shadow-lg shadow-blue-600/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  {isSigningIn ? "Signing In..." : "Sign In"}
+                </Button>
+                
+                {showWakingMessage && (
+                  <div className="text-center text-sm font-medium text-amber-600 dark:text-amber-500 animate-pulse mt-4 bg-amber-50 dark:bg-amber-500/10 py-2 rounded-lg border border-amber-200 dark:border-amber-500/20">
+                    Connecting to server... Please wait a moment.
                   </div>
-                  <div className="space-y-2">
-                    <label htmlFor="signup-confirm-password" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-blue-600" />
-                      Confirm Password
-                    </label>
-                    <div className="relative group">
-                      <Input
-                        id="signup-confirm-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={signUpConfirmPassword}
-                        onChange={(e) => setSignUpConfirmPassword(e.target.value)}
-                        required
-                        className="pl-11 h-12 border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 rounded-xl bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder:text-gray-500"
-                      />
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
+                )}
+              </form>
+            </TabsContent>
+            
+            {/* --- SIGN UP --- */}
+            <TabsContent value="signup" className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-0">
+              <form onSubmit={handleSignUp} className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="signup-email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Email Address
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="name@example.com"
+                      value={signUpEmail}
+                      onChange={(e) => setSignUpEmail(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="signup-password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Password
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Minimum 6 characters"
+                      value={signUpPassword}
+                      onChange={(e) => setSignUpPassword(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="signup-confirm-password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Confirm Password
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      id="signup-confirm-password"
+                      type="password"
+                      placeholder="Repeat password"
+                      value={signUpConfirmPassword}
+                      onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                  </div>
+                </div>
+
+                <div className="pt-2">
                   <Button 
                     type="submit"
                     disabled={isSigningUp}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                    className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 h-12 rounded-xl font-bold shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
                   >
-                    <span className="flex items-center justify-center gap-2">
-                      {isSigningUp ? "Creating Account..." : "Create Account"}
-                      {!isSigningUp && <ArrowRight className="w-4 h-4" />}
-                    </span>
+                    {isSigningUp ? "Creating Account..." : "Create Account"}
                   </Button>
-                  
-                  {showWakingMessage && (
-                    <div className="text-center text-sm text-blue-600 dark:text-blue-400 animate-pulse">
-                      Waking server... This takes a moment after inactivity
-                    </div>
-                  )}
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <div className="text-center mt-6">
-          <Button variant="ghost" onClick={() => navigate("/")}>
-            Back to Home
-          </Button>
+                </div>
+                
+                {showWakingMessage && (
+                  <div className="text-center text-sm font-medium text-amber-600 dark:text-amber-500 animate-pulse mt-4 bg-amber-50 dark:bg-amber-500/10 py-2 rounded-lg border border-amber-200 dark:border-amber-500/20">
+                    Connecting to server... Please wait a moment.
+                  </div>
+                )}
+              </form>
+            </TabsContent>
+          </Tabs>
         </div>
-      </div>
       </div>
     </div>
   );

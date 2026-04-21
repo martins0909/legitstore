@@ -991,6 +991,7 @@ const Shop = () => {
         activeShopCategory={activeCategory}
         onShopCategorySelect={handleCategoryNavigation}
         onShopCategoryMenuOpen={() => setShowCategorySheet(true)}
+        onSignOut={handleSignOut}
       />
 
       <Dialog open={showCategorySheet} onOpenChange={setShowCategorySheet}>
@@ -1031,6 +1032,19 @@ const Shop = () => {
                 </span>
               </button>
             ))}
+            
+            {/* Added Sign Out Button in Mobile Navbar Sheet */}
+            <div className="my-2 border-t border-slate-200 dark:border-slate-800"></div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="flex w-full items-center gap-3 rounded-[1.4rem] border border-red-200 bg-red-50 px-4 py-3.5 text-left transition-colors hover:bg-red-100 dark:border-red-900/30 dark:bg-red-950/20 dark:hover:bg-red-950/40"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400">
+                <LogOut className="h-5 w-5" />
+              </div>
+              <span className="font-semibold text-red-600 dark:text-red-400">Sign Out</span>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1286,74 +1300,95 @@ const Shop = () => {
 
             {/* Wallet Section */}
             <div ref={walletSectionRef}>
-            <motion.div 
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-            >
-            <Card className="mb-6 md:mb-8 bg-white/90 dark:bg-black/20 backdrop-blur-xl shadow-2xl border-2 border-white/60 dark:border-white/5">
-              <CardHeader className="pb-3 md:pb-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <button
-                      className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-                      title="View deposit history"
-                      onClick={() => setShowDepositHistory(true)}
-                    >
-                      <Banknote className="w-6 h-6 text-white" />
-                    </button>
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0">
-                      <Wallet className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="mb-8 md:mb-12 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 p-[2px] shadow-2xl">
+                  {/* Subtle inner background wrapper */}
+                  <div className="relative h-full w-full rounded-[2rem] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+                    
+                    {/* Left: Wallet Info */}
+                    <div className="flex w-full lg:w-auto flex-col">
+                      <div className="flex items-center justify-between w-full lg:justify-start gap-4 mb-2">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">
+                            <Wallet className="h-7 w-7" />
+                          </div>
+                          <div>
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Your Wallet</h2>
+                            <div className="flex items-baseline gap-1 mt-1">
+                              <span className="text-sm font-medium text-slate-400 mr-1">Balance:</span>
+                              <span className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                                ₦{Math.max(0, user.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Deposit History Button */}
+                        <button
+                          className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors shrink-0"
+                          title="View deposit history"
+                          onClick={() => setShowDepositHistory(true)}
+                        >
+                          <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg md:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-700">Your Wallet</CardTitle>
-                      <CardDescription className="text-sm md:text-lg font-semibold text-gray-700 dark:text-gray-300">Balance: <span className="text-blue-600">₦{Math.max(0, user.balance || 0).toFixed(2)}</span></CardDescription>
+
+                    {/* Divider for Desktop */}
+                    <div className="hidden lg:block h-24 w-px bg-slate-200 dark:bg-slate-800 absolute left-[45%] top-1/2 -translate-y-1/2" />
+
+                    {/* Right: Actions */}
+                    <div className="w-full lg:w-1/2 flex flex-col gap-4">
+                      
+                      <div className="flex flex-col sm:flex-row w-full gap-3">
+                        <div className="relative flex-1 group">
+                          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                            <span className="font-bold text-lg">₦</span>
+                          </div>
+                          <Input
+                            ref={walletInputRef}
+                            type="number"
+                            placeholder="Enter amount"
+                            value={addFundsAmount}
+                            onChange={(e) => setAddFundsAmount(e.target.value)}
+                            min="0"
+                            step="0.01"
+                            className="h-14 pl-10 pr-4 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg transition-all font-semibold text-slate-900 dark:text-white placeholder:font-normal"
+                          />
+                        </div>
+                        <Button 
+                          onClick={handleAddFunds}
+                          className="h-14 px-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold tracking-wide shadow-lg shadow-blue-600/25 transition-all active:scale-95 w-full sm:w-auto"
+                        >
+                          <Plus className="mr-2 h-5 w-5" />
+                          Add Funds
+                        </Button>
+                      </div>
+
+                      {/* Mobile manual add funds */}
+                      <button
+                        type="button"
+                        onClick={() => setShowManualAddFundsDialog(true)}
+                        className="md:hidden text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors py-2 text-center"
+                      >
+                        Add funds manually
+                      </button>
+                      
+                      <div className="flex items-center justify-between mt-1 pt-3 border-t border-slate-100 dark:border-slate-800/50">
+                        <p className="text-xs text-slate-400 font-medium hidden md:block">
+                          Instant tops with ErcasPay & card
+                        </p>
+                      </div>
+
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    onClick={handleSignOut} 
-                    className="hover:bg-red-50 hover:text-red-600 transition-all duration-300 flex items-center gap-2 text-sm md:text-base h-9 md:h-auto"
-                  >
-                    <LogOut className="h-4 w-4 md:h-5 md:w-5" />
-                    <span>Sign Out</span>
-                  </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
-                  <Input
-                    ref={walletInputRef}
-                    type="number"
-                    placeholder="Enter amount"
-                    value={addFundsAmount}
-                    onChange={(e) => setAddFundsAmount(e.target.value)}
-                    min="0"
-                    step="0.01"
-                    className="h-10 md:h-12 border-2 border-gray-200 dark:border-gray-700 focus:border-purple-500 transition-all duration-300 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm md:text-base"
-                  />
-                  <Button 
-                    onClick={handleAddFunds}
-                    className="h-10 md:h-12 px-4 md:px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl text-sm md:text-base w-full sm:w-auto"
-                  >
-                    <Plus className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-                    Add Funds
-                  </Button>
-                </div>
-                {/* Mobile-only manual add funds button */}
-                <div className="mt-2 md:hidden px-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowManualAddFundsDialog(true)}
-                    className="inline-flex w-full items-center justify-center rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-200 dark:border-white/10 dark:bg-slate-950/80 dark:text-slate-100 dark:hover:bg-slate-900"
-                  >
-                    Add funds manually
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-            </motion.div>
+              </motion.div>
             </div>
           </div>
         </div>

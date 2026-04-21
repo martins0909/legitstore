@@ -2,11 +2,13 @@ import { catalogAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import heroBackground from "@/assets/navbarbanner.jfif";
 import logo from "@/assets/imagebackground.png";
 import customerImage from "@/assets/customer.jpg";
 import boardImage from "@/assets/board.jpg";
-import { ShoppingBag, Shield, Zap, CreditCard, Globe2, Users, Star, Quote } from "lucide-react";
+import customerIcon from "@/assets/customericon.png";
+import { ShoppingBag, Shield, Zap, CreditCard, Globe2, Users, Star, Quote, HelpCircle } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -447,10 +449,10 @@ const Index = () => {
       {/* ⭐ Customer Trust and Testimonies */}
       <section className="relative z-10 px-4 py-16 md:px-6 md:py-24 mx-auto max-w-7xl">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, type: "spring" }}
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-orange-600 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400 mb-4">
@@ -469,10 +471,10 @@ const Index = () => {
           {testimonials.map((testimonial, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
+              initial={{ opacity: 0, x: i % 2 === 0 ? -100 : 100 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: i * 0.2, type: "spring", stiffness: 60 }}
               className="relative flex flex-col rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl dark:border-white/10 dark:bg-slate-900/40 dark:hover:bg-slate-900/60 md:p-8 backdrop-blur-sm group"
             >
               <Quote className="absolute top-6 right-6 h-10 w-10 text-blue-100 dark:text-blue-900/40 transition-transform group-hover:scale-110" />
@@ -506,12 +508,187 @@ const Index = () => {
         </div>
       </section>
 
-      {/* 📜 Footer */}
+      {/* ❓ Frequently Asked Questions */}
+      <section className="relative z-10 px-4 py-16 md:px-6 md:py-24 mx-auto max-w-4xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, type: "spring" }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400 mb-4">
+            <HelpCircle className="h-3.5 w-3.5 fill-current" />
+            SUPPORT
+          </div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-5xl lg:text-5xl dark:text-white mb-4">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            Quick answers about shopping, payments, delivery, and how Legit Store works.
+          </p>
+        </motion.div>
+
+        <motion.div
+           initial={{ opacity: 0, y: 60 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true, margin: "-50px" }}
+           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+           className="rounded-[2rem] border border-slate-200 bg-white/70 p-6 md:p-8 backdrop-blur-sm shadow-sm dark:border-white/10 dark:bg-slate-900/40"
+        >
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1" className="border-b border-slate-200 dark:border-slate-800">
+              <AccordionTrigger className="text-left text-[15px] font-semibold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400 py-5">
+                What does Legit Store offer?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-300 text-sm leading-7 pb-5">
+                Legit Store is a digital marketplace for social media accounts, verification-ready services, and related account products with fast delivery after purchase.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2" className="border-b border-slate-200 dark:border-slate-800">
+              <AccordionTrigger className="text-left text-[15px] font-semibold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400 py-5">
+                How do I buy a product?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-300 text-sm leading-7 pb-5">
+                Create an account, sign in, fund your wallet, choose a category or search for a product, then complete checkout from the shop page.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3" className="border-b border-slate-200 dark:border-slate-800">
+              <AccordionTrigger className="text-left text-[15px] font-semibold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400 py-5">
+                How is delivery handled?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-300 text-sm leading-7 pb-5">
+                After a successful purchase, available serials or account details are assigned automatically and shown in your purchase summary and history.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4" className="border-b border-slate-200 dark:border-slate-800">
+              <AccordionTrigger className="text-left text-[15px] font-semibold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400 py-5">
+                How do wallet top-ups work?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-300 text-sm leading-7 pb-5">
+                You can add funds through the supported payment flow from your wallet area. Once payment is verified, your wallet balance updates automatically.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5" className="border-b border-slate-200 dark:border-slate-800">
+              <AccordionTrigger className="text-left text-[15px] font-semibold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400 py-5">
+                Can I search for products before signing in?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-300 text-sm leading-7 pb-5">
+                Yes. Use the homepage navbar search to look for products by name, and use the category dropdown to jump directly into filtered shop results.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6" className="border-none">
+              <AccordionTrigger className="text-left text-[15px] font-semibold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400 py-5">
+                Where can I get support?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-300 text-sm leading-7 pb-5">
+                You can use the WhatsApp and Telegram contact links shown on the homepage for assistance with payments, orders, or account access.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </motion.div>
+
+        {/* 🎧 Support Banner */}
+        <motion.div
+           initial={{ opacity: 0, x: 100 }}
+           whileInView={{ opacity: 1, x: 0 }}
+           viewport={{ once: true, margin: "-50px" }}
+           transition={{ duration: 0.8, delay: 0.1, type: "spring", stiffness: 60 }}
+           className="mt-12 overflow-hidden rounded-[2rem] border border-slate-200 bg-white/70 backdrop-blur-sm shadow-sm dark:border-white/10 dark:bg-slate-900/40 relative flex flex-col md:flex-row items-center justify-between p-6 md:p-8"
+        >
+          <div className="flex items-center gap-5 z-10 text-center md:text-left flex-col md:flex-row w-full md:w-auto">
+            <div className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full border-4 border-slate-50 dark:border-slate-800 shadow-md overflow-hidden bg-white">
+               <img src={customerIcon} alt="Customer Support" className="h-full w-full object-cover" />
+            </div>
+            <div>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Still Have Questions?</h3>
+              <p className="mt-1.5 text-sm md:text-base text-slate-600 dark:text-slate-300 max-w-md">Our support team is available 24/7 to help you with any questions</p>
+            </div>
+          </div>
+          <div className="mt-6 md:mt-0 z-10 shrink-0 w-full md:w-auto">
+             <Button asChild size="lg" className="w-full md:w-auto rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30 font-semibold px-8 h-12">
+               <Link to="#support" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>
+                 Contact Support
+               </Link>
+             </Button>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* � CTA Blue Banner */}
+      <section className="relative z-10 px-4 pb-16 md:px-6 md:pb-24 mx-auto w-full">
+        <motion.div
+           initial={{ opacity: 0, y: 100, scale: 0.9 }}
+           whileInView={{ opacity: 1, y: 0, scale: 1 }}
+           viewport={{ once: true, margin: "-50px" }}
+           transition={{ duration: 0.9, type: "spring", stiffness: 50 }}
+           className="mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] bg-blue-700 text-white shadow-[0_20px_60px_-15px_rgba(29,78,216,0.5)] relative"
+        >
+          {/* Decorative Glowing Background Elements */}
+          <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 rounded-full bg-blue-500/50 w-[500px] h-[500px] blur-3xl opacity-60 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/4 rounded-full bg-blue-900/60 w-80 h-80 blur-3xl opacity-80 pointer-events-none"></div>
+          
+          <div className="relative z-10 px-6 py-12 md:px-12 md:py-16 flex flex-col items-center text-center">
+            {/* Pill Badge */}
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-800/40 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-blue-100 backdrop-blur-sm shadow-inner">
+              <Zap className="h-3.5 w-3.5 text-blue-300" />
+              Exclusive Limited-Time Deal
+            </div>
+            
+            <h2 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl drop-shadow-sm max-w-4xl" style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, Arial' }}>
+              Ready to Take Over Social Media?
+            </h2>
+            
+            <p className="mb-10 max-w-2xl text-base text-blue-100 md:text-xl leading-relaxed">
+              Join over <span className="font-bold text-white drop-shadow-md">50,000 happy customers</span> who trust Goodluckstore to boost their social media presence faster and smarter.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-4 mb-16">
+              <Button size="lg" className="h-14 rounded-full bg-white px-10 text-lg font-bold text-blue-700 hover:bg-blue-50 hover:scale-105 transition-transform duration-300 shadow-xl shadow-blue-900/20" onClick={() => navigate("/shop")}>
+                Shop Now
+              </Button>
+              <Button size="lg" variant="outline" className="h-14 rounded-full border-2 border-blue-400/60 bg-blue-800/30 px-10 text-lg font-bold text-white hover:bg-blue-800/60 hover:text-white hover:border-blue-300 transition-all duration-300 backdrop-blur-md" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>
+                Contact Support
+              </Button>
+            </div>
+            
+            {/* Stats Footer inside Banner */}
+            <div className="w-full rounded-3xl bg-blue-900/30 border border-blue-600/30 p-6 md:p-8 backdrop-blur-sm shadow-inner">
+              <div className="grid grid-cols-2 gap-y-8 gap-x-4 md:grid-cols-4 md:gap-x-8 text-center divide-x-0 md:divide-x divide-blue-500/20">
+                <div className="flex flex-col items-center px-4">
+                  <span className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-2 drop-shadow-sm">10K+</span>
+                  <span className="text-[11px] md:text-xs font-semibold text-blue-200 uppercase tracking-widest leading-snug">Successful Accounts<br/>Delivered</span>
+                </div>
+                <div className="flex flex-col items-center px-4 border-l border-blue-500/20 md:border-transparent">
+                  <span className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-2 drop-shadow-sm">4.9<span className="text-blue-300">★</span></span>
+                  <span className="text-[11px] md:text-xs font-semibold text-blue-200 uppercase tracking-widest leading-snug">Top Customer<br/>Reviews</span>
+                </div>
+                <div className="flex flex-col items-center px-4 pt-8 mt-4 border-t border-blue-500/20 md:p-0 md:mt-0 md:border-t-0 md:border-l">
+                  <span className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-2 drop-shadow-sm">24/7</span>
+                  <span className="text-[11px] md:text-xs font-semibold text-blue-200 uppercase tracking-widest leading-snug">Dedicated<br/>Support</span>
+                </div>
+                <div className="flex flex-col items-center px-4 pt-8 mt-4 border-t border-l border-blue-500/20 md:p-0 md:mt-0 md:border-t-0 border-l">
+                  <span className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-2 drop-shadow-sm">100%</span>
+                  <span className="text-[11px] md:text-xs font-semibold text-blue-200 uppercase tracking-widest leading-snug">Safe &<br/>Secure</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* �📜 Footer */}
       <motion.footer 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
+        initial={{ opacity: 0, y: 80 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative z-10 mx-5 mb-5 mt-auto rounded-2xl border border-slate-200 bg-white px-6 py-12 dark:border-white/10 dark:bg-black/55 md:mx-6 md:mb-6"
       >
         <div className="container mx-auto flex flex-col items-center text-center">

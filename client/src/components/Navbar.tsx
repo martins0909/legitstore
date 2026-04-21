@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { catalogCategoriesAPI } from "@/lib/api";
-import { ChevronDown, History, Menu, Search, X } from "lucide-react";
+import { ChevronDown, History, Menu, Search, X, LogOut } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/imagebackground.png";
@@ -19,6 +19,7 @@ interface NavbarProps {
   activeShopCategory?: string;
   onShopCategorySelect?: (category: string) => void;
   onShopCategoryMenuOpen?: () => void;
+  onSignOut?: () => void;
 }
 
 const Navbar = ({
@@ -29,6 +30,7 @@ const Navbar = ({
   activeShopCategory = "All",
   onShopCategorySelect,
   onShopCategoryMenuOpen,
+  onSignOut,
 }: NavbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -197,6 +199,20 @@ const Navbar = ({
                           </button>
                         )) : (
                           <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No categories yet</div>
+                        )}
+                        
+                        {isShopPage && onSignOut && (
+                          <>
+                            <div className="my-1 h-px w-full bg-slate-200 dark:bg-slate-700/50" />
+                            <button
+                              type="button"
+                              onClick={onSignOut}
+                              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-red-600 transition-colors duration-200 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                            >
+                              <LogOut className="h-4 w-4" />
+                              Sign Out
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
