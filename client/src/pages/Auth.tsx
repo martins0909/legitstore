@@ -210,31 +210,39 @@ const Auth = () => {
       </div>
 
       {/* ⚡ Right Pane - Form */}
-      <div className="relative flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-24">
+      <div className="relative flex flex-1 flex-col justify-center px-6 py-10 sm:py-12 sm:px-12 lg:px-24 bg-gradient-to-b from-blue-50/50 to-white dark:from-slate-900/50 dark:to-slate-950 md:bg-none">
         
-        {/* Mobile Header */}
-        <div className="absolute top-6 left-6 md:hidden flex items-center cursor-pointer z-20" onClick={() => navigate("/")}>
+        {/* Mobile Header elements hidden behind glassmorphism card */}
+        <div className="absolute top-6 left-6 md:hidden flex items-center cursor-pointer z-0 opacity-50" onClick={() => navigate("/")}>
           <img src={logo} alt="Legit Store" className="h-8 w-auto mr-2" />
         </div>
 
         <div className="absolute top-6 right-6 z-20">
-          <Button variant="ghost" className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 rounded-full h-10 px-4" onClick={() => navigate("/")}>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full h-10 px-5 shadow-md shadow-blue-600/20 transition-all active:scale-95" onClick={() => navigate("/")}>
             Back to Home
           </Button>
         </div>
 
-        <div className="mx-auto w-full max-w-sm xl:max-w-md relative z-10">
-          <div className="mb-10 text-center md:text-left">
-            <h2 className="text-3xl font-bold tracking-tight text-blue-600 dark:text-white mb-2">Get Started</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Enter your details below to continue your journey.</p>
+        {/* Mobile-focused Card Container */}
+        <div className="mx-auto w-full max-w-sm xl:max-w-md relative z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl md:bg-transparent md:backdrop-blur-none md:dark:bg-transparent border border-white/40 dark:border-slate-800/60 md:border-transparent rounded-[2rem] md:rounded-none p-6 sm:p-8 md:p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] md:shadow-none transition-all">
+          <div className="mb-8 md:mb-10 text-center md:text-left">
+            <div className="md:hidden flex justify-center mb-6">
+              <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-600/30">
+                <img src={logo} alt="Logo" className="h-10 w-10 mix-blend-screen" />
+              </div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2" style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui, -apple-system, Arial' }}>
+              Welcome <span className="text-blue-600">Back</span>
+            </h2>
+            <p className="text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400">Enter your details to access your account.</p>
           </div>
 
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 p-1.5 mb-10 shadow-inner">
-              <TabsTrigger value="signin" className="rounded-lg h-10 font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-blue-400 transition-all">
+            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-100/80 dark:bg-slate-950/80 p-1.5 mb-8 md:mb-10 shadow-inner">
+              <TabsTrigger value="signin" className="rounded-xl h-11 text-sm font-bold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white transition-all">
                 Sign In
               </TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-lg h-10 font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-blue-400 transition-all">
+              <TabsTrigger value="signup" className="rounded-xl h-11 text-sm font-bold data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white transition-all">
                 Sign Up
               </TabsTrigger>
             </TabsList>
