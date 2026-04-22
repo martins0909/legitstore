@@ -1242,17 +1242,6 @@ const Shop = () => {
           transition={{ duration: 0.5 }}
           className="relative mb-6"
         >
-          {/* Welcome badge positioned slightly above banner - smaller on mobile */}
-          <div className="absolute -top-3 right-2 md:-top-4 md:right-6 z-10">
-            <div className="flex items-center gap-1 md:gap-2 bg-white/90 dark:bg-white/5 backdrop-blur-xl px-2 py-1 md:px-4 md:py-2 rounded-full shadow-xl border-2 border-white/70 dark:border-white/5">
-              <span className="text-xs md:text-base text-gray-700 dark:text-gray-300 font-medium">
-                {user.name || user.email.split('@')[0]}
-              </span>
-              <BadgeCheck className="h-3 w-3 md:h-5 md:w-5 text-blue-600" />
-              <span className="text-[10px] md:text-sm text-gray-600 dark:text-gray-400 font-semibold">welcome back</span>
-            </div>
-          </div>
-          
           <a 
             href="https://chat.whatsapp.com/Jyr22tl4NNA6GJ5dXIpAlv?mode=wwt" 
             target="_blank" 
@@ -1306,22 +1295,43 @@ const Shop = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="mb-8 md:mb-12 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 p-[2px] shadow-2xl">
+                <div className="mb-8 md:mb-12 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.4)]">
                   {/* Subtle inner background wrapper */}
-                  <div className="relative h-full w-full rounded-[2rem] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+                  <div className="relative h-full w-full rounded-[2rem] px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
                     
+                    {/* Background decorations */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 rounded-full blur-2xl pointer-events-none translate-y-1/2 -translate-x-1/2"></div>
+
                     {/* Left: Wallet Info */}
-                    <div className="flex w-full lg:w-auto flex-col">
-                      <div className="flex items-center justify-between w-full lg:justify-start gap-4 mb-2">
+                    <div className="flex w-full lg:w-auto flex-col relative z-10">
+                      
+                      {/* Top: User Welcome */}
+                      <div className="flex items-center gap-3 mb-8 bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-2xl p-2 pr-6 w-fit border border-white/20 shadow-sm">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-blue-600 font-extrabold text-xl shadow-inner shrink-0">
+                          {(user.name || user.email).charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white text-base truncate max-w-[120px] md:max-w-[200px]">
+                              {user.name || user.email.split('@')[0]}
+                            </span>
+                            <BadgeCheck className="h-[18px] w-[18px] text-[#4ade80]" />
+                          </div>
+                          <span className="text-[11px] font-semibold text-blue-100/90 uppercase tracking-wider">welcome back</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between w-full lg:justify-start gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-white shrink-0 backdrop-blur-md border border-white/20">
                             <Wallet className="h-7 w-7" />
                           </div>
                           <div>
-                            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Your Wallet</h2>
+                            <h2 className="text-xs font-bold uppercase tracking-widest text-blue-100/70">Your Wallet</h2>
                             <div className="flex items-baseline gap-1 mt-1">
-                              <span className="text-sm font-medium text-slate-400 mr-1">Balance:</span>
-                              <span className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                              <span className="text-sm font-medium text-blue-100 mr-1">Balance:</span>
+                              <span className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm">
                                 ₦{Math.max(0, user.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                               </span>
                             </div>
@@ -1330,25 +1340,25 @@ const Shop = () => {
                         
                         {/* Deposit History Button */}
                         <button
-                          className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors shrink-0"
+                          className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0 backdrop-blur-md border border-white/20 ml-2"
                           title="View deposit history"
                           onClick={() => setShowDepositHistory(true)}
                         >
-                          <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                          <Banknote className="h-6 w-6" />
                         </button>
                       </div>
                     </div>
 
                     {/* Divider for Desktop */}
-                    <div className="hidden lg:block h-24 w-px bg-slate-200 dark:bg-slate-800 absolute left-[45%] top-1/2 -translate-y-1/2" />
+                    <div className="hidden lg:block h-32 w-px bg-white/20 absolute left-[50%] top-1/2 -translate-y-1/2 pointer-events-none" />
 
                     {/* Right: Actions */}
-                    <div className="w-full lg:w-1/2 flex flex-col gap-4">
+                    <div className="w-full lg:w-[45%] flex flex-col gap-4 relative z-10">
                       
                       <div className="flex flex-col sm:flex-row w-full gap-3">
                         <div className="relative flex-1 group">
-                          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                            <span className="font-bold text-lg">₦</span>
+                          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-blue-600 font-bold text-lg z-10 transition-colors">
+                            <span>₦</span>
                           </div>
                           <Input
                             ref={walletInputRef}
@@ -1358,12 +1368,12 @@ const Shop = () => {
                             onChange={(e) => setAddFundsAmount(e.target.value)}
                             min="0"
                             step="0.01"
-                            className="h-14 pl-10 pr-4 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-lg transition-all font-semibold text-slate-900 dark:text-white placeholder:font-normal"
+                            className="h-14 pl-10 pr-4 rounded-xl border-white/30 bg-white/95 focus:bg-white focus:ring-4 focus:ring-white/30 focus:border-white text-lg transition-all font-bold text-slate-800 placeholder:font-medium placeholder:text-slate-400 shadow-inner"
                           />
                         </div>
                         <Button 
                           onClick={handleAddFunds}
-                          className="h-14 px-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold tracking-wide shadow-lg shadow-blue-600/25 transition-all active:scale-95 w-full sm:w-auto"
+                          className="h-14 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-bold tracking-wide shadow-xl transition-all active:scale-95 w-full sm:w-auto dark:bg-slate-950"
                         >
                           <Plus className="mr-2 h-5 w-5" />
                           Add Funds
@@ -1374,13 +1384,13 @@ const Shop = () => {
                       <button
                         type="button"
                         onClick={() => setShowManualAddFundsDialog(true)}
-                        className="md:hidden text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors py-2 text-center"
+                        className="md:hidden text-sm font-bold text-white hover:text-blue-100 transition-colors py-2 text-center underline decoration-white/40 underline-offset-4"
                       >
                         Add funds manually
                       </button>
                       
-                      <div className="flex items-center justify-between mt-1 pt-3 border-t border-slate-100 dark:border-slate-800/50">
-                        <p className="text-xs text-slate-400 font-medium hidden md:block">
+                      <div className="flex items-center justify-between mt-1 pt-3 border-t border-white/20">
+                        <p className="text-xs text-blue-100/90 font-medium hidden md:block">
                           Instant tops with ErcasPay & card
                         </p>
                       </div>
