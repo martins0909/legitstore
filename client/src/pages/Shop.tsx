@@ -1445,7 +1445,7 @@ const Shop = () => {
           </div>
         </motion.div>
 
-        <div className="px-0 md:px-6">
+        <div className="px-3 md:px-6">
           <div className="w-full md:container md:mx-auto">
             
             {/* Header Section (subtitle only now, main title moved into banner) */}
@@ -1454,7 +1454,7 @@ const Shop = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-8 md:mb-12"
+              className="text-center mb-6 md:mb-12"
             >
               <p className="text-sm md:text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">Discover our curated collection of high-quality social media accounts</p>
             </motion.div>
@@ -1467,9 +1467,9 @@ const Shop = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="mb-8 md:mb-12 relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.4)]">
+                <div className="mb-8 md:mb-12 relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.4)]">
                   {/* Subtle inner background wrapper */}
-                  <div className="relative h-full w-full rounded-[2rem] px-5 py-6 md:px-10 md:py-10 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-12">
+                  <div className="relative h-full w-full rounded-3xl md:rounded-[2rem] px-4 py-5 md:px-10 md:py-10 flex flex-col lg:flex-row items-center justify-between gap-5 lg:gap-12">
                     
                     {/* Background decorations */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
@@ -1479,8 +1479,8 @@ const Shop = () => {
                     <div className="flex w-full lg:w-auto flex-col relative z-10">
                       
                       {/* Top: User Welcome */}
-                      <div className="flex items-center gap-2 md:gap-3 mb-5 md:mb-8 bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-2xl p-1.5 pr-4 md:p-2 md:pr-6 w-fit border border-white/20 shadow-sm">
-                        <div className="flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-xl bg-white text-blue-600 font-extrabold text-base md:text-xl shadow-inner shrink-0">
+                      <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-8 bg-white/10 dark:bg-black/10 backdrop-blur-md rounded-2xl p-1.5 pr-4 md:p-2 md:pr-6 w-fit border border-white/20 shadow-sm">
+                        <div className="flex h-8 w-8 md:h-12 md:w-12 items-center justify-center rounded-xl bg-white text-blue-600 font-extrabold text-sm md:text-xl shadow-inner shrink-0">
                           {(user.name || user.email).charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
@@ -1557,9 +1557,9 @@ const Shop = () => {
                       <div className="flex md:hidden flex-col w-full gap-2">
                         <Button 
                           onClick={() => { setAddFundsStep("amount"); setShowAddFundsFlow(true); }}
-                          className="h-12 px-6 rounded-xl bg-slate-900 hover:bg-black text-white text-sm font-bold tracking-wide shadow-xl transition-all active:scale-95 w-full dark:bg-slate-950"
+                          className="h-10 px-4 rounded-[0.8rem] bg-slate-900 hover:bg-black text-white text-xs font-bold tracking-wide shadow-xl transition-all active:scale-95 w-full dark:bg-slate-950"
                         >
-                          <Plus className="mr-1.5 h-4 w-4" />
+                          <Plus className="mr-1.5 h-3.5 w-3.5" />
                           Add Funds
                         </Button>
                       </div>
