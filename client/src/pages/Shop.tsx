@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
 import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon, Activity } from "lucide-react";
 import bannerImg from "@/assets/banner.jpg";
-import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus } from "lucide-react";
+import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // Removed demo product assets; shop now shows only database products
 
@@ -143,6 +143,8 @@ const Shop = () => {
   } | null>(null);
   // Manual add funds dialog (mobile)
   const [showManualAddFundsDialog, setShowManualAddFundsDialog] = useState(false);
+  const [showAddFundsFlow, setShowAddFundsFlow] = useState(false);
+  const [addFundsStep, setAddFundsStep] = useState<"amount" | "method">("amount");
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [activeMobileSection, setActiveMobileSection] = useState<MobileSection>("fund");
   const walletSectionRef = useRef<HTMLDivElement | null>(null);
@@ -579,10 +581,8 @@ const Shop = () => {
 
   const handleMobileFundClick = () => {
     setActiveMobileSection("fund");
-    walletSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => {
-      walletInputRef.current?.focus();
-    }, 350);
+    setAddFundsStep("amount");
+    setShowAddFundsFlow(true);
   };
 
   const formatPrice = (price: number) => (Number.isInteger(price) ? price : price.toFixed(2));
@@ -1233,6 +1233,178 @@ const Shop = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Mobile Fintech-style Add Funds Flow */}
+      <Dialog open={showAddFundsFlow} onOpenChange={setShowAddFundsFlow}>
+        <DialogContent className="fixed inset-x-0 bottom-0 top-auto w-full max-w-none translate-x-0 translate-y-0 p-0 overflow-hidden flex flex-col h-[85vh] sm:h-auto rounded-t-[2rem] rounded-b-none border-x-0 border-b-0 border-t border-white/60 bg-white dark:bg-slate-950 shadow-[0_-20px_60px_rgba(15,23,42,0.22)] data-[state=closed]:slide-out-to-bottom-[100%] data-[state=open]:slide-in-from-bottom-[100%] sm:max-w-md sm:mx-auto sm:top-[50%] sm:bottom-auto sm:-translate-y-1/2 sm:rounded-[2rem]">
+          <div className="mx-auto mt-3 h-1.5 w-16 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 sm:hidden" />
+          <div className="flex-1 overflow-y-auto w-full pt-3 pb-8 px-5 lg:px-6 custom-scrollbar">
+            
+            <div className="flex items-center justify-between mb-8 relative">
+              <button 
+                onClick={() => setShowAddFundsFlow(false)}
+                className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white absolute left-1/2 -translate-x-1/2">
+                Fund wallet
+              </h2>
+            </div>
+
+            {addFundsStep === "amount" ? (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="space-y-4 pt-4">
+                  <p className="text-[11px] font-bold text-center text-slate-400 uppercase tracking-[0.2em]">Enter Amount</p>
+                  <div className="relative group mx-auto max-w-[280px]">
+                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-900 dark:text-white font-extrabold text-3xl z-10 transition-colors">
+                      <span>₦</span>
+                    </div>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={addFundsAmount}
+                      onChange={(e) => setAddFundsAmount(e.target.value)}
+                      min="0"
+                      step="0.01"
+                      className="h-20 pl-14 pr-4 rounded-2xl border-2 border-transparent bg-slate-50 dark:bg-slate-900 focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-4xl font-extrabold text-center text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-700 shadow-inner"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 pt-4">
+                    {[1000, 2000, 5000, 10000].map(amt => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setAddFundsAmount(amt.toString())}
+                        className="h-12 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 active:scale-95 transition-all shadow-sm"
+                      >
+                        {amt >= 1000 ? `${amt/1000}k` : amt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button 
+                    className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)] active:scale-[0.98] transition-all"
+                    disabled={!addFundsAmount || parseFloat(addFundsAmount) <= 0}
+                    onClick={() => setAddFundsStep("method")}
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-right-8 duration-300">
+                <div className="text-center space-y-2 pb-2">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Amount to fund</p>
+                  <p className="text-[2.5rem] font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    <span className="text-blue-600 dark:text-blue-500">₦</span>
+                    {parseFloat(addFundsAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+                
+                <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center mb-3">Select Payment Method</p>
+                  
+                  <button 
+                    onClick={() => { setShowAddFundsFlow(false); handleAddFunds(); }}
+                    className="flex items-center justify-between w-full p-4 rounded-2xl bg-white dark:bg-slate-950 border-2 border-blue-500 text-left shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                        <Plus className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 dark:text-white text-[15px]">Instant payment</p>
+                        <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-0.5">ErcasPay</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-blue-500" />
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowAddFundsFlow(false); setShowManualAddFundsDialog(true); }}
+                    className="flex items-center justify-between w-full p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left shadow-sm hover:border-slate-300 dark:hover:border-slate-700 active:scale-[0.98] transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-600 dark:text-slate-400 shrink-0">
+                        <Banknote className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 dark:text-white text-[15px]">Bank transfer</p>
+                        <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">Manual Verification</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-slate-400" />
+                  </button>
+                  
+                  <button 
+                    onClick={() => setAddFundsStep("amount")} 
+                    className="w-full text-center mt-6 text-sm font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors py-2"
+                  >
+                     Change amount
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Common block: History */}
+            <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-2">
+                  <History className="h-4 w-4 text-slate-400" />
+                  <h3 className="font-bold text-[13px] text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Transactions</h3>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {depositHistory.slice(0, 3).map((deposit, index) => {
+                  const isSuccess = (deposit.status || "").toLowerCase() === "completed" || (deposit.status || "").toLowerCase() === "success" || (deposit.status || "").toLowerCase() === "successful";
+                  return (
+                    <div
+                      key={deposit._id || `mobile-dep-${index}`}
+                      className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40"
+                    >
+                      <div>
+                        <p className="text-[15px] font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                          ₦{(deposit.amount || 0).toLocaleString()}
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                          {new Date(deposit.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} • {getDepositMethodLabel({ method: deposit.method, reference: deposit.reference })}
+                        </p>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${isSuccess ? 'text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/50' : 'text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-950/50'}`}>
+                        {isSuccess ? 'Success' : deposit.status || "Pending"}
+                      </span>
+                    </div>
+                  );
+                })}
+                
+                {depositHistory.length === 0 && (
+                  <div className="py-8 text-center flex flex-col items-center justify-center">
+                    <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center mb-3">
+                      <Banknote className="h-5 w-5 text-slate-300 dark:text-slate-600" />
+                    </div>
+                    <p className="text-sm font-semibold text-slate-500">No recent transactions</p>
+                  </div>
+                )}
+                
+                {depositHistory.length > 3 && (
+                  <button 
+                    onClick={() => { setShowAddFundsFlow(false); setShowDepositHistory(true); }}
+                    className="w-full text-center text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 pt-3 flex items-center justify-center gap-1 mx-auto"
+                  >
+                    View All History <ChevronRight className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="pt-24 relative z-10">
         {/* Banner Section with Welcome Badge - Full Width */}
         <motion.div 
@@ -1355,9 +1527,10 @@ const Shop = () => {
                     {/* Right: Actions */}
                     <div className="w-full lg:w-[45%] flex flex-col gap-3 md:gap-4 relative z-10">
                       
-                      <div className="flex flex-col sm:flex-row w-full gap-2 md:gap-3">
+                      {/* Desktop Actions */}
+                      <div className="hidden md:flex flex-row w-full gap-3">
                         <div className="relative flex-1 group">
-                          <div className="absolute inset-y-0 left-3 md:left-4 flex items-center pointer-events-none text-blue-600 font-bold text-base md:text-lg z-10 transition-colors">
+                          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-blue-600 font-bold text-lg z-10 transition-colors">
                             <span>₦</span>
                           </div>
                           <Input
@@ -1368,30 +1541,35 @@ const Shop = () => {
                             onChange={(e) => setAddFundsAmount(e.target.value)}
                             min="0"
                             step="0.01"
-                            className="h-12 md:h-14 pl-8 md:pl-10 pr-3 md:pr-4 rounded-xl border-white/30 bg-white/95 focus:bg-white focus:ring-4 focus:ring-white/30 focus:border-white text-base md:text-lg transition-all font-bold text-slate-800 placeholder:font-medium placeholder:text-slate-400 shadow-inner"
+                            className="h-14 pl-10 pr-4 rounded-xl border-white/30 bg-white/95 focus:bg-white focus:ring-4 focus:ring-white/30 focus:border-white text-lg transition-all font-bold text-slate-800 placeholder:font-medium placeholder:text-slate-400 shadow-inner"
                           />
                         </div>
                         <Button 
                           onClick={handleAddFunds}
-                          className="h-12 md:h-14 px-6 md:px-8 rounded-xl bg-slate-900 hover:bg-black text-white text-sm md:text-base font-bold tracking-wide shadow-xl transition-all active:scale-95 w-full sm:w-auto dark:bg-slate-950"
+                          className="h-14 px-8 rounded-xl bg-slate-900 hover:bg-black text-white text-base font-bold tracking-wide shadow-xl transition-all active:scale-95 dark:bg-slate-950"
                         >
-                          <Plus className="mr-1.5 md:mr-2 h-4 w-4 md:h-5 md:w-5" />
+                          <Plus className="mr-2 h-5 w-5" />
                           Add Funds
                         </Button>
                       </div>
 
-                      {/* Mobile manual add funds */}
-                      <button
-                        type="button"
-                        onClick={() => setShowManualAddFundsDialog(true)}
-                        className="md:hidden text-xs font-bold text-white hover:text-blue-100 transition-colors py-1.5 text-center underline decoration-white/40 underline-offset-4"
-                      >
-                        Add funds manually
-                      </button>
-                      
+                      {/* Mobile Actions */}
+                      <div className="flex md:hidden flex-col w-full gap-2">
+                        <Button 
+                          onClick={() => { setAddFundsStep("amount"); setShowAddFundsFlow(true); }}
+                          className="h-12 px-6 rounded-xl bg-slate-900 hover:bg-black text-white text-sm font-bold tracking-wide shadow-xl transition-all active:scale-95 w-full dark:bg-slate-950"
+                        >
+                          <Plus className="mr-1.5 h-4 w-4" />
+                          Add Funds
+                        </Button>
+                      </div>
+
                       <div className="flex items-center justify-between mt-1 pt-2 md:pt-3 border-t border-white/20">
                         <p className="text-xs text-blue-100/90 font-medium hidden md:block">
                           Instant tops with ErcasPay & card
+                        </p>
+                        <p className="text-[10px] text-blue-100/90 font-medium md:hidden text-center w-full">
+                          Deposit securely using Ercaspay or Bank Transfer
                         </p>
                       </div>
 
