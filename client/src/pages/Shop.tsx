@@ -811,6 +811,7 @@ const Shop = () => {
       } else {
         toast.error(msg);
       }
+    } finally {
       setIsCreatingTopup(false);
     }
   };
@@ -1071,6 +1072,67 @@ const Shop = () => {
               disabled={phonePromptValue.length !== 11 || isCreatingTopup}
             >
               {isCreatingTopup ? "Creating Account..." : "Create Virtual Account"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Display Virtual Account Details Dialog */}
+      <Dialog open={showVADialog} onOpenChange={!isProcessingVA ? setShowVADialog : undefined}>
+        <DialogContent className="max-w-sm rounded-[1.75rem] border border-white/60 bg-white/95 p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-950/95 overflow-hidden">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-xl text-center font-bold text-blue-700 dark:text-blue-300">
+              Your Funding Account
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">Bank</span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-200">{vaDetails?.bankName || 'Palmpay'}</span>
+            </div>
+            
+            <div className="flex flex-col gap-1 p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/30 relative">
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 tracking-wider uppercase">Account Number</span>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-2xl font-bold tracking-widest text-slate-900 dark:text-white">
+                  {vaDetails?.accountNumber}
+                </span>
+                <button 
+                  onClick={() => {
+                      if (vaDetails?.accountNumber) {
+                          navigator.clipboard.writeText(vaDetails.accountNumber);
+                          toast.success("Account Number copied to clipboard!");
+                      }
+                  }}
+                  className="flex items-center justify-center p-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm active:scale-95 transition-all"
+                  title="Copy Account Number"
+                >
+                  <Copy className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-1 p-4 mb-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">Account Name</span>
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-200 break-words">{vaDetails?.accountName || 'Joy Buy Plaza'}</span>
+            </div>
+            
+            <Button
+              className="w-full h-14 rounded-xl bg-slate-900 hover:bg-black text-white text-lg font-bold shadow-lg transition-all dark:bg-slate-950"
+              onClick={handleVADone}
+              disabled={isProcessingVA}
+            >
+              {isProcessingVA ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                "Done"
+              )}
             </Button>
           </div>
         </DialogContent>
