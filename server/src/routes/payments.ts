@@ -86,18 +86,19 @@ router.post('/create-session', async (req, res) => {
       method: 'POST',
       headers: {
           'Authorization': `Bearer ${POCKETFI_SECRET}`,
-    });
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transactionData),
+      });
 
-    const responseText = await fetchResponse.text();
-    let parsedData;
-    
-    try {
-      parsedData = JSON.parse(responseText);
-    } catch {
-      console.error('PocketFi Invalid Response:', responseText.substring(0, 300));
-      return res.status(500).json({ success: false, error: 'Invalid response from gateway.' });
-    }
-
+      const responseText = await fetchResponse.text();      let parsedData;
+      
+      try {
+        parsedData = JSON.parse(responseText);
+      } catch {
+        console.error('PocketFi Invalid Response:', responseText.substring(0, 300));
+        return res.status(500).json({ success: false, error: 'Invalid response from gateway.' });
+      }
     if (parsedData.status && parsedData.banks && parsedData.banks.length > 0) {
       const bankInfo = parsedData.banks[0];
       
