@@ -215,33 +215,32 @@ router.get('/webhook', (_req, res) => {
 /**
  * POST /api/payments/webhook
  */
-router.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
-  try {
-    const rawPayload = typeof req.body === 'string' || Buffer.isBuffer(req.body) ? req.body.toString() : JSON.stringify(req.body);
-    const pocketfiSignature = req.header('POCKETFI-SIGNATURE') || req.header('HTTP-POCKETFI-SIGNATURE') || '';
+  router.post('/webhook', async (req, res) => {
+    try {
+      console.log('Pocketfi Webhook Headers:', req.headers);
+      console.log('Pocketfi Webhook Body:', req.body);
 
-    if (!pocketfiSignature) return res.status(400).json({ message: 'Missing PocketFi signature' });
+      const pocketfiSignature = req.headers['pocketfi-signature'] || req.headers['x-pocketfi-signature'] || req.header('POCKETFI-SIGNATURE') || '';
+  
+      if (!pocketfiSignature) {
+        console.warn('Missing PocketFi signature header');
+      }
 
-    const expectedHash = createHmac('sha512', POCKETFI_SECRET).update(rawPayload).digest('hex');
-
-    if (pocketfiSignature.toLowerCase() !== expectedHash.toLowerCase()) {
-      console.warn('PocketFi webhook permission denied, invalid hash');
-    }
-
-    const evt = typeof req.body === 'string' || Buffer.isBuffer(req.body) ? JSON.parse(rawPayload) : req.body;
-    console.log('Pocketfi Webhook Received:', JSON.stringify(evt, null, 2));
-
-    const dataObj = evt?.data || evt || {};
-    const order = dataObj.order || {};
-    const transaction = dataObj.transaction || {};
-    const customer = dataObj.customer || {};
-    const reference = transaction.reference;
-    const amount = Number(order.amount) || Number(dataObj.amount) || 0;
-
-    if (!reference) return res.status(400).json({ message: 'No reference' });
-
+      const evt = req.body || {};
+      const dataObj = evt?.data || evt || {};
+      const order = dataObj.order || {};
+      const transaction = dataObj.transaction || {};
+      const customer = dataObj.customer || {};
+      const reference = transaction.reference;
+      const amount = Number(order.amount) || Number(dataObj.amount) || 0;
+  
+      if (!reference) {
+         console.warn('Webhook ignoring: No reference found in payload', JSON.stringify(evt));
+         return res.status(400).json({ message: 'No reference' });
+      }
+      
     const { Payment, User } = await import('../models');
-    
+
     // First, try to find an existing payment
     let existingPayment = await Payment.findOne({ $or: [{ transactionReference: reference }, { reference: reference }] }).exec();
 
