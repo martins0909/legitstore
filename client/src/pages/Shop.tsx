@@ -1718,6 +1718,7 @@ const Shop = () => {
                             Deposit securely using Ercaspay or Bank Transfer
                           </p> */}
 
+                      </div>
                     </div>
                   </div>
                 </div>
