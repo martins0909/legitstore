@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Mail, Lock, User, ArrowRight, Shield } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Shield, Phone } from "lucide-react";
 import { apiFetch, catalogAPI, catalogCategoriesAPI, warmBackend } from "@/lib/api";
 import logo from "@/assets/imagebackground.png";
 import heroBackground from "@/assets/navbarbanner.jfif";
@@ -16,6 +16,8 @@ const Auth = () => {
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpPhone, setSignUpPhone] = useState("");
+  const [signUpName, setSignUpName] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
   const [resetEmail, setResetEmail] = useState("");
@@ -96,8 +98,13 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!signUpEmail || !signUpPassword || !signUpConfirmPassword) {
+    if (!signUpEmail || !signUpPassword || !signUpConfirmPassword || !signUpPhone || !signUpName) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (signUpPhone.length !== 11) {
+      toast.error("Phone number must be exactly 11 digits");
       return;
     }
 
@@ -122,8 +129,8 @@ const Auth = () => {
       const data = await apiFetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: signUpEmail, password: signUpPassword }),
-      }) as { ok: boolean; user: { id: string; email: string; name?: string; balance: number } };
+        body: JSON.stringify({ email: signUpEmail, password: signUpPassword, name: signUpName, phone: signUpPhone }),
+      }) as { ok: boolean; user: { id: string; email: string; name?: string; phone?: string; balance: number } };
 
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       toast.success("Account created successfully!");
@@ -351,6 +358,40 @@ const Auth = () => {
             {/* --- SIGN UP --- */}
             <TabsContent value="signup" className="animate-in fade-in slide-in-from-bottom-4 duration-500 mt-0">
               <form onSubmit={handleSignUp} className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="signup-name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Full Name
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="John Doe"
+                      value={signUpName}
+                      onChange={(e) => setSignUpName(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="signup-phone" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Phone Number
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      placeholder="08000000000"
+                      value={signUpPhone}
+                      onChange={(e) => setSignUpPhone(e.target.value)}
+                      required
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-800 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-900/80 transition-colors rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <label htmlFor="signup-email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Email Address

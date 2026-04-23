@@ -82,6 +82,10 @@ const Shop = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const [user, setUser] = useState<User | null>(null);
+  // Phone Prompt for existing users
+  const [showPhonePrompt, setShowPhonePrompt] = useState(false);
+  const [phonePromptValue, setPhonePromptValue] = useState("");
+
   const [addFundsAmount, setAddFundsAmount] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -732,12 +736,14 @@ const Shop = () => {
     }
   }, [showDepositHistory]);
 
-  const handleAddFunds = async () => {
+  const handleAddFunds = async (phoneOrEvent?: string | any) => {
     const amount = parseFloat(addFundsAmount);
     if (isNaN(amount) || amount <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
+
+    const phoneFromPrompt = typeof phoneOrEvent === 'string' ? phoneOrEvent : undefined;
 
     // Show loading state
     setIsCreatingTopup(true);
@@ -752,6 +758,7 @@ const Shop = () => {
           currency: "NGN",
           userId: user!.id,
           email: user!.email,
+          phone: phoneFromPrompt,
           // Include amount in callback so we can recover if localStorage missing
           callbackUrl: `${window.location.origin}/shop?ercasAmount=${amount}`,
         }),
@@ -779,7 +786,13 @@ const Shop = () => {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to start payment";
-      toast.error(msg);
+      
+      // If PocketFi complains about phone number, show prompt
+      if (msg.toLowerCase().includes("phone must be 11 digits") || msg.toLowerCase().includes("phone number is required")) {
+        setShowPhonePrompt(true);
+      } else {
+        toast.error(msg);
+      }
       setIsCreatingTopup(false);
     }
   };
@@ -993,6 +1006,48 @@ const Shop = () => {
         onShopCategoryMenuOpen={() => setShowCategorySheet(true)}
         onSignOut={handleSignOut}
       />
+
+      <Dialog open={showPhonePrompt} onOpenChange={setShowPhonePrompt}>
+        <DialogContent className="max-w-sm rounded-[1.75rem] border border-white/60 bg-white/95 p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-950/95">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-blue-700 dark:text-blue-300">
+              One-Time Identity Update
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              To automatically generate your dedicated Virtual Account, our payment provider requires an 11-digit phone number. This is a one-time update!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="prompt-phone" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Phone Number
+              </label>
+              <Input
+                id="prompt-phone"
+                type="tel"
+                placeholder="08012345678"
+                value={phonePromptValue}
+                onChange={(e) => setPhonePromptValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 11))}
+                className="h-12 border-slate-200 focus:border-blue-600 focus:ring-blue-600/20 bg-slate-50"
+              />
+            </div>
+            <Button
+              className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold"
+              onClick={() => {
+                if (phonePromptValue.length !== 11) {
+                  toast.error("Please enter a valid 11-digit phone number");
+                  return;
+                }
+                setShowPhonePrompt(false);
+                handleAddFunds(phonePromptValue);
+              }}
+              disabled={phonePromptValue.length !== 11 || isCreatingTopup}
+            >
+              {isCreatingTopup ? "Creating Account..." : "Create Virtual Account"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showCategorySheet} onOpenChange={setShowCategorySheet}>
         <DialogContent className="fixed inset-x-0 bottom-0 top-auto w-full max-w-none translate-x-0 translate-y-0 rounded-t-[2rem] rounded-b-none border-x-0 border-b-0 border-t border-white/60 bg-white/95 p-0 shadow-[0_-20px_60px_rgba(15,23,42,0.22)] data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom dark:border-slate-800 dark:bg-slate-950/95 sm:max-w-none">
@@ -1317,7 +1372,7 @@ const Shop = () => {
                       </div>
                       <div>
                         <p className="font-bold text-slate-900 dark:text-white text-[15px]">Instant payment</p>
-                        <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-0.5">ErcasPay</p>
+                        <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-0.5">Pocketfi</p>
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-blue-500" />
