@@ -3,9 +3,6 @@ import { randomUUID, createHmac } from 'crypto';
 
 const router = express.Router();
 
-const POCKETFI_SECRET = process.env.POCKETFI_SECRET_KEY;
-const POCKETFI_PUBLIC = process.env.POCKETFI_PUBLIC_KEY;
-
 async function resolveUserRecord(userId?: string, email?: string, fallbackLocalId?: string) {
   const { User } = await import('../models');
   for (const candidate of [userId, fallbackLocalId]) {
@@ -77,21 +74,22 @@ router.post('/create-session', async (req, res) => {
       last_name: resolvedUser.name?.split(' ')[1] || 'User',
       phone: finalPhone,
       bank: 'palmpay', // Explicitly use palmpay as tested
-        businessId: process.env.POCKETFI_BUSINESS_ID,
-      metadata: { userId }
-    };
-
-    const fetchResponse = await fetch('https://api.pocketfi.ng/api/v1/virtual-accounts/create', {
-      method: 'POST',
-      headers: {
-          'Authorization': `Bearer ${POCKETFI_SECRET}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(transactionData),
-      });
-
-      const responseText = await fetchResponse.text();      let parsedData;
-      
+        businessId: process.env.POCKETFI_BUSINESS_ID?.trim(),
+        metadata: { userId }
+      };
+  
+      const fetchResponse = await fetch('https://api.pocketfi.ng/api/v1/virtual-accounts/create', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.POCKETFI_SECRET_KEY?.trim()}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(transactionData),
+        });
+  
+      const responseText = await fetchResponse.text();
+      let parsedData;
+        
       try {
         parsedData = JSON.parse(responseText);
       } catch {

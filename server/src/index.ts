@@ -1,14 +1,15 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+
+dotenv.config();
+
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import axios from "axios";
 import { User, Admin, Cart, Payment, Product, CatalogProduct, PurchaseHistory, CatalogCategory } from "./models";
 import paymentsRouter from "./routes/payments";
-
-dotenv.config();
 
 const app = express();
 // CORS: allow requests from the frontend origins and ensure preflight responses
