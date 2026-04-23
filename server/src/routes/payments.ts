@@ -1,414 +1,306 @@
 import express from 'express';
-import Ercaspay from '@capitalsage/ercaspay-nodejs';
+import { randomUUID, createHmac } from 'crypto';
 
 const router = express.Router();
 
-// Validate Ercaspay configuration
-const ECRS_SECRET_KEY = process.env.ECRS_SECRET_KEY;
-if (!ECRS_SECRET_KEY || ECRS_SECRET_KEY.trim() === '') {
-  console.error('FATAL: ECRS_SECRET_KEY is not set in environment variables!');
-}
-
-// Initialize Ercaspay client - MUST use baseURL (uppercase) not baseUrl
-const ercaspay = new Ercaspay({
-  baseURL: 'https://api.ercaspay.com',
-  secretKey: ECRS_SECRET_KEY || '',
-});
-
-const normalizeGatewayReference = (value: unknown): string | undefined => {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-
-  const cleaned = value.split('?')[0].split('&')[0].trim();
-  return cleaned.length > 0 ? cleaned : undefined;
-};
-
-const resolveGatewayReference = (payload: Record<string, any>): string | undefined => {
-  return normalizeGatewayReference(
-    payload.transactionReference
-      || payload.transactionRef
-      || payload.reference
-      || payload.paymentReference
-      || payload?.data?.transactionReference
-      || payload?.data?.transactionRef
-      || payload?.data?.reference
-      || payload?.data?.paymentReference,
-  );
-};
-
-const resolveCustomerEmail = (payload: Record<string, any>): string | undefined => {
-  const email = payload.customerEmail || payload?.data?.customer?.email || payload?.data?.customerEmail;
-  return typeof email === 'string' && email.trim().length > 0 ? email.trim() : undefined;
-};
+const POCKETFI_SECRET = process.env.POCKETFI_SECRET_KEY || 'c3ce3fdbed6b8e28bde2852eda980991cec8df55aa1272c8c562ce7d08fea7d1';
+const POCKETFI_PUBLIC = process.env.POCKETFI_PUBLIC_KEY || '18762|JECTGW9AbwI8HXz0Beed9mcOyK1DAajSIF832xP9a1b4c2e5';
 
 async function resolveUserRecord(userId?: string, email?: string, fallbackLocalId?: string) {
   const { User } = await import('../models');
-
   for (const candidate of [userId, fallbackLocalId]) {
-    if (!candidate || typeof candidate !== 'string') {
-      continue;
-    }
-
+    if (!candidate || typeof candidate !== 'string') continue;
     try {
       const foundUser = await User.findById(candidate).exec();
-      if (foundUser) {
-        return foundUser;
-      }
-    } catch {
-      // Ignore malformed ids and continue to other strategies.
-    }
+      if (foundUser) return foundUser;
+    } catch {}
   }
-
-  if (email) {
-    return User.findOne({ email }).exec();
-  }
-
+  if (email) return User.findOne({ email }).exec();
   return null;
 }
 
 /**
  * POST /api/payments/create-session
- * Creates a new payment checkout session with Ercaspay
+ * We piggyback on this endpoint to provide the Virtual Account Funding
  */
 router.post('/create-session', async (req, res) => {
   try {
-    const { amount, currency, userId, email, callbackUrl } = req.body;
-
-    // Validate required fields
-    if (!amount || !currency || !userId || !email) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: amount, currency, userId, email',
-      });
-    }
-
-    // Generate unique payment reference
-    const paymentReference = ercaspay.generatePaymentReferenceUuid();
-
-    // Build redirect URL to return customer to /shop with our paymentReference in query
-    const baseRedirect = (callbackUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/shop`).toString();
-    const redirectUrlWithRef = baseRedirect.includes('?')
-      ? `${baseRedirect}&pref=${encodeURIComponent(paymentReference)}`
-      : `${baseRedirect}?pref=${encodeURIComponent(paymentReference)}`;
-
-    // Prepare transaction data
-    const transactionData = {
-      amount: String(amount),
-      paymentReference,
-      paymentMethods: 'card,bank-transfer,ussd',
-      customerName: 'Customer', // You can enhance this by getting actual customer name
-      customerEmail: email,
-      currency: currency.toUpperCase(),
-      customerPhoneNumber: '', // Optional - can be added to frontend form
-      redirectUrl: redirectUrlWithRef,
-      description: `Wallet top-up for user ${userId}`,
-      feeBearer: 'merchant',
-      metadata: {
-        userId,
-        type: 'wallet-topup',
-      },
-    };
-
-    // Optional: light debug for transaction (avoid logging secrets)
-    console.log('Ercaspay initiateTransaction called', {
-      paymentReference,
-      amount: String(amount),
-      currency: currency.toUpperCase(),
-      hasSecretKey: Boolean(ECRS_SECRET_KEY && ECRS_SECRET_KEY.length > 0)
-    });
-
-  // Initiate transaction with Ercaspay
-  const response = await ercaspay.initiateTransaction(transactionData);
-
-    // Check if transaction was successful
-    if (response.requestSuccessful && response.responseBody) {
-      const { checkoutUrl } = response.responseBody;
-      
-      // Log full response to see what Ercaspay returns
-      console.log('Ercaspay response body:', JSON.stringify(response.responseBody, null, 2));
-      
-      // Ercaspay verifyTransaction expects the paymentReference we sent, not a separate transactionReference
-      // We'll return our paymentReference for verification
-      const transactionReference = response.responseBody.transactionReference
-        || response.responseBody.transactionRef
-        || response.responseBody.reference
-        || null;
-
-      // Try to record a pending payment in DB (best-effort; don't block response)
-      try {
-        const { Payment } = await import('../models');
-        const resolvedUser = await resolveUserRecord(userId, email, userId);
-        await Payment.create({
-          user: resolvedUser?._id,
-          userLocalId: (transactionData as any).metadata?.userId,
-          email: transactionData.customerEmail,
-          amount: Number(transactionData.amount) || 0,
-          method: 'ercaspay',
-          status: 'pending',
-          reference: paymentReference,
-          transactionReference: transactionReference || undefined,
-          isCredited: false,
+      const { amount, currency, userId, email, callbackUrl, phone } = req.body;
+  
+      if (!userId || !email) {
+        return res.status(400).json({
+          success: false,
+          error: 'Missing required fields: userId, email',
         });
-      } catch (e) {
-        console.warn('Payment DB record (pending) failed:', (e as Error).message);
+      }
+  
+      const { User } = await import('../models');
+      let resolvedUser = await resolveUserRecord(userId, email, userId);
+      
+      if (!resolvedUser) {
+        return res.status(404).json({ success: false, error: 'User not found' });
       }
 
-      return res.status(200).json({
-        success: true,
-        checkoutUrl,
-        paymentReference, // our internally generated UUID
-        transactionReference, // gateway provided reference for verification
+      const finalPhone = resolvedUser.phone || phone;
+    // Return existing static account if already created
+    if (resolvedUser.pocketfiVirtualAccount && resolvedUser.pocketfiVirtualAccount.accountNumber) {
+      const q = new URLSearchParams({
+        accountNumber: resolvedUser.pocketfiVirtualAccount.accountNumber,
+        bankName: resolvedUser.pocketfiVirtualAccount.bankName,
+        accountName: resolvedUser.pocketfiVirtualAccount.accountName || 'Joy Buy Plaza',
+        amount: amount || '0',
+        redirect: callbackUrl || ''
       });
-    } else {
-      return res.status(400).json({
-        success: false,
-        error: response.responseMessage || 'Failed to create payment session',
+      const checkoutUrl = `${req.protocol}://${req.get('host')}/api/payments/pocketfi-checkout?${q.toString()}`;
+      return res.status(200).json({ 
+        success: true, 
+        checkoutUrl,
+        paymentReference: 'STATIC_VA_' + resolvedUser.pocketfiVirtualAccount.accountNumber,
+        transactionReference: 'STATIC_VA_' + resolvedUser.pocketfiVirtualAccount.accountNumber
       });
     }
+
+    // Ensure we have a valid 11-digit phone number before creating VA
+    if (!finalPhone || finalPhone.length !== 11) {
+      return res.status(400).json({ success: false, error: 'Phone number is required and must be exactly 11 digits.' });
+    }
+
+    // Save it to user profile if it was missing
+    if (!resolvedUser.phone) {
+      resolvedUser.phone = finalPhone;
+      await resolvedUser.save();
+    }
+
+    // Create a new static Virtual Account for this user
+    const transactionData = {
+      email: email,
+      first_name: resolvedUser.name?.split(' ')[0] || 'Customer',
+      last_name: resolvedUser.name?.split(' ')[1] || 'User',
+      phone: finalPhone,
+      bank: 'palmpay', // Explicitly use palmpay as tested
+      businessId: process.env.POCKETFI_BUSINESS_ID || '29793',
+      metadata: { userId }
+    };
+
+    const fetchResponse = await fetch('https://api.pocketfi.ng/api/v1/virtual-accounts/create', {
+      method: 'POST',
+      headers: {
+          'Authorization': `Bearer ${POCKETFI_SECRET}`,
+    });
+
+    const responseText = await fetchResponse.text();
+    let parsedData;
+    
+    try {
+      parsedData = JSON.parse(responseText);
+    } catch {
+      console.error('PocketFi Invalid Response:', responseText.substring(0, 300));
+      return res.status(500).json({ success: false, error: 'Invalid response from gateway.' });
+    }
+
+    if (parsedData.status && parsedData.banks && parsedData.banks.length > 0) {
+      const bankInfo = parsedData.banks[0];
+      
+      resolvedUser.pocketfiVirtualAccount = {
+        accountNumber: bankInfo.accountNumber,
+        bankName: bankInfo.bankName,
+        accountName: bankInfo.accountName,
+      };
+      await resolvedUser.save();
+
+      const q = new URLSearchParams({
+        accountNumber: bankInfo.accountNumber,
+        bankName: bankInfo.bankName,
+        accountName: bankInfo.accountName || 'Joy Buy Plaza',
+        amount: amount || '0',
+        redirect: callbackUrl || ''
+      });
+      const checkoutUrl = `${req.protocol}://${req.get('host')}/api/payments/pocketfi-checkout?${q.toString()}`;
+
+      return res.status(200).json({ 
+        success: true, 
+        checkoutUrl,
+        paymentReference: 'STATIC_VA_' + bankInfo.accountNumber,
+        transactionReference: 'STATIC_VA_' + bankInfo.accountNumber
+      });
+    } else {
+      return res.status(400).json({ success: false, error: parsedData.message || 'Failed to create virtual account' });
+    }
   } catch (error: any) {
-    console.error('Error creating payment session:', error);
-    console.error('Error details:', {
-      message: error.message,
-      responseData: error.responseData,
-      stack: error.stack?.split('\n').slice(0, 5).join('\n')
-    });
-    return res.status(500).json({
-      success: false,
-      error: error.responseData?.responseMessage || error.message || 'Internal server error',
-    });
+    console.error('Error creating virtual account:', error);
+    return res.status(500).json({ success: false, error: error.message || 'Internal server error' });
   }
 });
 
 /**
+ * GET /api/payments/pocketfi-checkout
+ */
+router.get('/pocketfi-checkout', (req, res) => {
+  const { accountNumber, bankName, accountName, amount, redirect } = req.query;
+  const goBackUrl = redirect || '/';
+
+  res.send(`<!DOCTYPE html>
+  <html>
+  <head>
+    <title>Fund Wallet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+      .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; width: 100%; text-align: center; }
+      h1 { color: #111827; font-size: 1.5rem; margin-bottom: 0.5rem; }
+      .subtitle { color: #6b7280; font-size: 0.875rem; margin-bottom: 1.5rem; }
+      .amount { font-size: 2rem; font-weight: bold; color: #059669; margin: 1rem 0; }
+      .details { background: #f3f4f6; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; text-align: left; }
+      .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.75rem; }
+      .detail-row:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
+      .label { color: #6b7280; font-size: 0.875rem; }
+      .value { font-weight: 600; color: #1f2937; }
+      .btn { display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 500; width: 100%; box-sizing: border-box; margin-top: 1rem; }
+      .btn:hover { background: #1d4ed8; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Your Funding Account</h1>
+      <p class="subtitle">Transfer to this account to automatically fund your wallet. This account is dedicated to you and can be reused anytime.</p>
+      
+      <div class="details">
+        <div class="detail-row"><span class="label">Bank</span><span class="value">${bankName}</span></div>
+        <div class="detail-row"><span class="label">Account Number</span><span class="value">${accountNumber}</span></div>
+        <div class="detail-row"><span class="label">Account Name</span><span class="value">${accountName}</span></div>
+      </div>
+      <p style="color: #4b5563; font-size: 0.875rem;">Funds are credited automatically. You can go back whenever you are done.</p>
+      <a href="${goBackUrl}" class="btn">Return to Shop</a>
+    </div>
+  </body>
+  </html>`);
+});
+
+/**
  * GET /api/payments/verify
- * Verifies a payment transaction status
  */
 router.get('/verify', async (req, res) => {
   try {
     const { reference } = req.query;
+    if (!reference || typeof reference !== 'string') return res.status(400).json({ success: false, error: 'Payment reference is required' });
 
-    if (!reference || typeof reference !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: 'Payment reference is required',
-      });
-    }
-
-    // Sanitize reference in case provider appended their own query after our value
     const cleanReference = String(reference).split('?')[0].split('&')[0].trim();
+    const { Payment } = await import('../models');
+    const payment = await Payment.findOne({ $or: [{ transactionReference: cleanReference }, { reference: cleanReference }] }).lean();
 
-    console.log('=== Verify Payment ===');
-    console.log('Verifying reference:', cleanReference);
-
-  // Verify transaction with Ercaspay
-  const response = await ercaspay.verifyTransaction(cleanReference);
-
-    console.log('Ercaspay verify response:', JSON.stringify({
-      requestSuccessful: response.requestSuccessful,
-      responseCode: response.responseCode,
-      responseMessage: response.responseMessage,
-      responseBody: response.responseBody,
-    }, null, 2));
-
-    // Check verification response
-    if (response.requestSuccessful && response.responseBody) {
-      const transactionData = response.responseBody;
-
-      // Map Ercaspay response codes to our status
-      let status = 'pending';
-      if (response.responseCode === 'success') {
-        status = 'success';
-      } else if (response.responseCode === 'failed') {
-        status = 'failed';
-      }
-
+    if (payment) {
       return res.status(200).json({
         success: true,
-        status,
-        amount: transactionData.amount || 0,
-  reference: cleanReference,
-        data: transactionData,
-      });
-    } else {
-      console.log('Ercaspay verify failed, checking DB fallback...');
-      // Fallback: if gateway says not found, check DB if webhook already marked it completed
-      try {
-        const { Payment } = await import('../models');
-        const paid = await Payment.findOne({
-          $or: [{ transactionReference: cleanReference }, { reference: cleanReference }],
-          status: 'completed',
-        }).lean();
-        if (paid) {
-          console.log('Found completed payment in DB:', paid._id);
-          return res.status(200).json({
-            success: true,
-            status: 'success',
-            amount: paid.amount,
-            reference: cleanReference,
-            data: { source: 'webhook-cache' },
-          });
-        } else {
-          console.log('No completed payment found in DB for reference:', reference);
-        }
-      } catch (e) {
-        console.warn('DB lookup fallback failed:', (e as Error).message);
-      }
-
-      return res.status(400).json({
-        success: false,
-        error: response.responseMessage || 'Failed to verify payment',
-        status: 'failed',
+        status: payment.status === 'completed' ? 'success' : payment.status,
+        amount: payment.amount,
+        reference: cleanReference,
+        data: payment,
       });
     }
+
+    return res.status(200).json({ success: true, status: 'pending', amount: 0, reference: cleanReference, data: { source: 'not-yet-finished' } });
   } catch (error: any) {
-    console.error('Error verifying payment:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.responseData?.responseMessage || error.message || 'Internal server error',
-      status: 'failed',
-    });
+    return res.status(500).json({ success: false, error: error.message || 'Internal server error', status: 'failed' });
   }
 });
 
 /**
  * GET /api/payments/webhook
- * Browser-friendly health response for the webhook endpoint
  */
 router.get('/webhook', (_req, res) => {
-  return res.status(200).json({
-    ok: true,
-    message: 'Webhook endpoint is active. Ercaspay should send POST requests to this URL.',
-  });
+  return res.status(200).json({ ok: true, message: 'Webhook endpoint is active for PocketFi.' });
 });
 
 /**
  * POST /api/payments/webhook
- * Ercaspay webhook endpoint to receive transaction updates
- * Note: For production, verify signatures if the provider supports it.
  */
-router.post('/webhook', async (req, res) => {
+router.post('/webhook', express.raw({ type: '*/*' }), async (req, res) => {
   try {
-    const evt = req.body || {};
-    const reference = resolveGatewayReference(evt);
-    const metadata = evt.metadata || evt?.data?.metadata || {};
-    const email = resolveCustomerEmail(evt);
+    const rawPayload = typeof req.body === 'string' || Buffer.isBuffer(req.body) ? req.body.toString() : JSON.stringify(req.body);
+    const pocketfiSignature = req.header('POCKETFI-SIGNATURE') || req.header('HTTP-POCKETFI-SIGNATURE') || '';
 
-    if (!reference) {
-      console.warn('Webhook without reference:', evt);
-      return res.status(200).json({ received: true });
+    if (!pocketfiSignature) return res.status(400).json({ message: 'Missing PocketFi signature' });
+
+    const expectedHash = createHmac('sha512', POCKETFI_SECRET).update(rawPayload).digest('hex');
+
+    if (pocketfiSignature.toLowerCase() !== expectedHash.toLowerCase()) {
+      console.warn('PocketFi webhook permission denied, invalid hash');
     }
 
-    // Confirm with gateway to avoid spoofing
-    const verifyResp = await ercaspay.verifyTransaction(reference);
-    if (verifyResp.requestSuccessful && verifyResp.responseBody) {
-      const code = verifyResp.responseCode;
-      const success = code === 'success';
-      const responseBody = verifyResp.responseBody as Record<string, any>;
-      const amt = Number(responseBody.amount || 0);
-      const paymentReference = normalizeGatewayReference(responseBody.paymentReference || responseBody.reference || reference);
-      const transactionReference = normalizeGatewayReference(
-        responseBody.transactionReference || responseBody.transactionRef || reference,
-      );
+    const evt = typeof req.body === 'string' || Buffer.isBuffer(req.body) ? JSON.parse(rawPayload) : req.body;
+    console.log('Pocketfi Webhook Received:', JSON.stringify(evt, null, 2));
 
-      try {
-        const { Payment, User } = await import('../models');
-        const existingPayment = await Payment.findOne({
-          $or: [
-            { transactionReference: transactionReference },
-            { reference: transactionReference },
-            { transactionReference: paymentReference },
-            { reference: paymentReference },
-          ],
-        }).exec();
+    const dataObj = evt?.data || evt || {};
+    const order = dataObj.order || {};
+    const transaction = dataObj.transaction || {};
+    const customer = dataObj.customer || {};
+    const reference = transaction.reference;
+    const amount = Number(order.amount) || Number(dataObj.amount) || 0;
 
-        const resolvedUser = await resolveUserRecord(
-          metadata?.userId,
-          email,
-          existingPayment?.userLocalId,
-        );
+    if (!reference) return res.status(400).json({ message: 'No reference' });
 
-        const payment = existingPayment || new Payment({
-          method: 'ercaspay',
-          status: 'pending',
-          isCredited: false,
-        });
+    const { Payment, User } = await import('../models');
+    
+    // First, try to find an existing payment
+    let existingPayment = await Payment.findOne({ $or: [{ transactionReference: reference }, { reference: reference }] }).exec();
 
-        payment.user = resolvedUser?._id;
-        payment.userLocalId = metadata?.userId || payment.userLocalId;
-        payment.email = email || payment.email;
-        payment.amount = isNaN(amt) ? payment.amount || 0 : amt;
-        payment.method = 'ercaspay';
-        payment.status = success ? 'completed' : 'failed';
-        payment.transactionReference = transactionReference || payment.transactionReference;
-        payment.reference = paymentReference || payment.reference;
-
-        if (success && resolvedUser && !payment.isCredited) {
-          await User.findByIdAndUpdate(
-            resolvedUser._id,
-            { $inc: { balance: payment.amount } },
-            { new: true },
-          ).exec();
-          payment.isCredited = true;
-          console.log('Webhook credited wallet', {
-            userId: String(resolvedUser._id),
-            amount: payment.amount,
-            reference: payment.reference,
-            transactionReference: payment.transactionReference,
-          });
-        }
-
-        await payment.save();
-      } catch (e) {
-        console.error('Failed to upsert Payment from webhook:', (e as Error).message);
+    if (existingPayment) {
+      if (existingPayment.status === 'completed' || existingPayment.isCredited) return res.status(200).json({ message: 'success' });
+      existingPayment.status = 'completed';
+      
+      const resolvedUser = await resolveUserRecord(existingPayment.userLocalId, existingPayment.email, String(existingPayment.user));
+      if (resolvedUser && !existingPayment.isCredited) {
+        await User.findByIdAndUpdate(resolvedUser._id, { $inc: { balance: amount || existingPayment.amount } }, { new: true }).exec();
+        existingPayment.isCredited = true;
       }
-    } else {
-      console.warn('Gateway verification failed in webhook:', verifyResp.responseMessage);
+      await existingPayment.save();
+      return res.status(200).json({ message: 'success' });
     }
 
-    // Always acknowledge to prevent retries storms; adjust if provider expects different codes
-    return res.status(200).json({ received: true });
+    // It's a static virtual account transfer.
+    let targetUser = null;
+
+    // Try finding via account_number in the webhook if pocketfi passes it
+    const possibleStrings = [
+      dataObj.account_number, dataObj.virtual_account,
+      order.description, dataObj.description,
+      customer.email
+    ].filter(Boolean).join(' ');
+
+    const acctMatch = possibleStrings.match(/(\d{10})/);
+    if (acctMatch) {
+      targetUser = await User.findOne({ 'pocketfiVirtualAccount.accountNumber': acctMatch[1] }).exec();
+    }
+    
+    // Check by email
+    if (!targetUser && customer.email) {
+      targetUser = await User.findOne({ email: customer.email }).exec();
+    }
+    
+    if (targetUser && amount > 0) {
+      // Top up the balance
+      await User.findByIdAndUpdate(targetUser._id, { $inc: { balance: amount } }, { new: true }).exec();
+      
+      // Record the payment
+      await Payment.create({
+        user: targetUser._id,
+        email: targetUser.email,
+        amount: amount,
+        method: 'pocketfi',
+        status: 'completed',
+        reference: reference, 
+        transactionReference: reference,
+        isCredited: true,
+      });
+
+      return res.status(200).json({ message: 'wallet funded successfully' });
+    }
+
+    console.warn('PocketFi webhook unmapped transfer:', reference);
+    return res.status(200).json({ message: 'success, but Unmapped or Ignored' });
   } catch (err) {
-    console.error('Webhook error:', err);
-    return res.status(200).json({ received: true });
-  }
-});
-
-/**
- * GET /api/payments/status/:reference
- * Fetches detailed transaction status (alternative to verify)
- */
-router.get('/status/:reference', async (req, res) => {
-  try {
-    const { reference } = req.params;
-
-    if (!reference) {
-      return res.status(400).json({
-        success: false,
-        error: 'Payment reference is required',
-      });
-    }
-
-    // Fetch transaction details
-    const response = await ercaspay.fetchTransactionDetails(reference);
-
-    if (response.requestSuccessful && response.responseBody) {
-      return res.status(200).json({
-        success: true,
-        data: response.responseBody,
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        error: response.responseMessage || 'Failed to fetch transaction status',
-      });
-    }
-  } catch (error: any) {
-    console.error('Error fetching transaction status:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.responseData?.responseMessage || error.message || 'Internal server error',
-    });
+    console.error('PocketFi Webhook error:', err);
+    return res.status(500).json({ message: 'server error' });
   }
 });
 

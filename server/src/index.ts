@@ -164,7 +164,7 @@ app.post("/api/admin/login", async (req: Request, res: Response) => {
 // User registration
 app.post("/api/auth/register", async (req: Request, res: Response) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
     if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
     
     // Check if user already exists
@@ -179,6 +179,7 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       name: name || undefined,
+      phone: phone || undefined,
       balance: 0
     });
     
@@ -188,6 +189,7 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
         id: user._id, 
         email: user.email, 
         name: user.name,
+        phone: user.phone,
         balance: user.balance 
       } 
     });
@@ -215,6 +217,7 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
         id: user._id, 
         email: user.email, 
         name: user.name,
+        phone: user.phone,
         balance: user.balance 
       } 
     });
@@ -247,6 +250,7 @@ app.get("/api/users/current/:id", async (req: Request, res: Response) => {
       id: user._id,
       email: user.email,
       name: user.name,
+      phone: user.phone,
       balance: user.balance || 0
     });
   } catch (err) {

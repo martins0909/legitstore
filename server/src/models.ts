@@ -32,8 +32,14 @@ export interface IPayment extends Document {
 export interface IUser extends Document {
   email: string;
   name?: string;
+  phone?: string;
   password?: string;
   balance?: number;
+  pocketfiVirtualAccount?: {
+    accountNumber: string;
+    bankName: string;
+    accountName: string;
+  };
   createdAt: Date;
 }
 
@@ -153,8 +159,14 @@ const PaymentSchema = new Schema<IPayment>({
 const UserSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true },
   name: { type: String },
+  phone: { type: String },
   password: { type: String },
   balance: { type: Number, default: 0 },
+  pocketfiVirtualAccount: {
+    accountNumber: String,
+    bankName: String,
+    accountName: String,
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
