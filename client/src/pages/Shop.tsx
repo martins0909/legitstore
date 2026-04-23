@@ -1711,13 +1711,12 @@ const Shop = () => {
                       </div>
 
                       <div className="flex items-center justify-between mt-1 pt-2 md:pt-3 border-t border-white/20">
-                        <p className="text-xs text-blue-100/90 font-medium hidden md:block">
-                          Instant tops with ErcasPay & card
-                        </p>
-                        <p className="text-[10px] text-blue-100/90 font-medium md:hidden text-center w-full">
-                          Deposit securely using Ercaspay or Bank Transfer
-                        </p>
-                      </div>
+                          {/* <p className="text-xs text-blue-100/90 font-medium hidden md:block">
+                            Instant tops with ErcasPay & card
+                          </p>
+                          <p className="text-[10px] text-blue-100/90 font-medium md:hidden text-center w-full">
+                            Deposit securely using Ercaspay or Bank Transfer
+                          </p> */}
 
                     </div>
                   </div>
