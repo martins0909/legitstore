@@ -55,10 +55,7 @@ router.post('/create-session', async (req, res) => {
       return res.status(200).json({ 
         success: true, 
         checkoutUrl,
-        paymentReference: 'STATIC_VA_' + resolvedUser.pocketfiVirtualAccount.accountNumber,
-        transactionReference: 'STATIC_VA_' + resolvedUser.pocketfiVirtualAccount.accountNumber
-      });
-    }
+          virtualAccount: resolvedUser.pocketfiVirtualAccount,
 
     // Ensure we have a valid 11-digit phone number before creating VA
     if (!finalPhone || finalPhone.length !== 11) {

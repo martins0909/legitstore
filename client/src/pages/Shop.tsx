@@ -150,6 +150,9 @@ const Shop = () => {
   const [showAddFundsFlow, setShowAddFundsFlow] = useState(false);
   const [addFundsStep, setAddFundsStep] = useState<"amount" | "method">("amount");
   const [showCategorySheet, setShowCategorySheet] = useState(false);
+  const [showVADialog, setShowVADialog] = useState(false);
+  const [vaDetails, setVaDetails] = useState<{ accountNumber: string; bankName: string; accountName: string } | null>(null);
+  const [isProcessingVA, setIsProcessingVA] = useState(false);
   const [activeMobileSection, setActiveMobileSection] = useState<MobileSection>("fund");
   const walletSectionRef = useRef<HTMLDivElement | null>(null);
   const walletInputRef = useRef<HTMLInputElement | null>(null);
@@ -199,25 +202,26 @@ const Shop = () => {
   }, [navigate]);
 
   // Periodically refresh user balance from backend (every 10 seconds)
+  const refreshBalance = async () => {
+    if (!user) return;
+    try {
+      const res = await apiFetch(`/api/users/current/${user.id}`);
+      const userData = res as { id: string; email: string; name?: string; balance: number };
+      
+      // Only update if balance has changed
+      if (userData.balance !== user.balance) {
+        const updatedUser = { ...user, balance: userData.balance };
+        setUser(updatedUser);
+        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      }
+    } catch (e) {
+      // Silently fail - user can still use the app with cached balance
+      console.error("Failed to refresh balance:", e);
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
-
-    const refreshBalance = async () => {
-      try {
-        const res = await apiFetch(`/api/users/current/${user.id}`);
-        const userData = res as { id: string; email: string; name?: string; balance: number };
-        
-        // Only update if balance has changed
-        if (userData.balance !== user.balance) {
-          const updatedUser = { ...user, balance: userData.balance };
-          setUser(updatedUser);
-          localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-        }
-      } catch (e) {
-        // Silently fail - user can still use the app with cached balance
-        console.error("Failed to refresh balance:", e);
-      }
-    };
 
     // Refresh immediately on mount, then every 10 seconds
     refreshBalance();
@@ -764,10 +768,11 @@ const Shop = () => {
         }),
       });
 
-      const { checkoutUrl, paymentReference, transactionReference } = res as {
+      const { checkoutUrl, paymentReference, transactionReference, virtualAccount } = res as {
         checkoutUrl: string;
         paymentReference: string;
         transactionReference: string | null;
+        virtualAccount?: { accountNumber: string; bankName: string; accountName: string };
       };
 
       // Store reference for later verification
@@ -778,11 +783,24 @@ const Shop = () => {
         createdAt: Date.now(),
       }));
 
-      // Immediately redirect to payment page (same tab)
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+      // Instead of redirecting to checkoutUrl, we parse the account details (either directly or from URL)
+      // and show the pop-up modal.
+      let acctDetails = virtualAccount;
+      if (!acctDetails && checkoutUrl) {
+        const urlParams = new URL(checkoutUrl).searchParams;
+        acctDetails = {
+          accountNumber: urlParams.get('accountNumber') || '',
+          bankName: urlParams.get('bankName') || '',
+          accountName: urlParams.get('accountName') || 'Joy Buy Plaza'
+        };
+      }
+
+      if (acctDetails && acctDetails.accountNumber) {
+        setVaDetails(acctDetails);
+        setShowVADialog(true);
+        setShowAddFundsFlow(false);
       } else {
-        toast.error("Failed to get payment URL");
+        toast.error("Failed to generate virtual account");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to start payment";
@@ -795,6 +813,15 @@ const Shop = () => {
       }
       setIsCreatingTopup(false);
     }
+  };
+
+  const handleVADone = () => {
+    setIsProcessingVA(true);
+    setTimeout(() => {
+      setIsProcessingVA(false);
+      setShowVADialog(false);
+      refreshBalance();
+    }, 2000);
   };
 
   // On return from payment provider, auto-resume verification if we see our reference in URL
