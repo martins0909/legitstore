@@ -3,8 +3,8 @@ import { randomUUID, createHmac } from 'crypto';
 
 const router = express.Router();
 
-const POCKETFI_SECRET = process.env.POCKETFI_SECRET_KEY || 'c3ce3fdbed6b8e28bde2852eda980991cec8df55aa1272c8c562ce7d08fea7d1';
-const POCKETFI_PUBLIC = process.env.POCKETFI_PUBLIC_KEY || '18762|JECTGW9AbwI8HXz0Beed9mcOyK1DAajSIF832xP9a1b4c2e5';
+const POCKETFI_SECRET = process.env.POCKETFI_SECRET_KEY;
+const POCKETFI_PUBLIC = process.env.POCKETFI_PUBLIC_KEY;
 
 async function resolveUserRecord(userId?: string, email?: string, fallbackLocalId?: string) {
   const { User } = await import('../models');
@@ -77,7 +77,7 @@ router.post('/create-session', async (req, res) => {
       last_name: resolvedUser.name?.split(' ')[1] || 'User',
       phone: finalPhone,
       bank: 'palmpay', // Explicitly use palmpay as tested
-      businessId: process.env.POCKETFI_BUSINESS_ID || '29793',
+        businessId: process.env.POCKETFI_BUSINESS_ID,
       metadata: { userId }
     };
 
