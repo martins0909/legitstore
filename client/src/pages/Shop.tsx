@@ -783,24 +783,10 @@ const Shop = () => {
         createdAt: Date.now(),
       }));
 
-      // Instead of redirecting to checkoutUrl, we parse the account details (either directly or from URL)
-      // and show the pop-up modal.
-      let acctDetails = virtualAccount;
-      if (!acctDetails && checkoutUrl) {
-        const urlParams = new URL(checkoutUrl).searchParams;
-        acctDetails = {
-          accountNumber: urlParams.get('accountNumber') || '',
-          bankName: urlParams.get('bankName') || '',
-          accountName: urlParams.get('accountName') || 'Joy Buy Plaza'
-        };
-      }
-
-      if (acctDetails && acctDetails.accountNumber) {
-        setVaDetails(acctDetails);
-        setShowVADialog(true);
-        setShowAddFundsFlow(false);
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
       } else {
-        toast.error("Failed to generate virtual account");
+        toast.error("Failed to generate checkout URL. Please try again.");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to start payment";

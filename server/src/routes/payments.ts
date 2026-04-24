@@ -15,7 +15,7 @@ async function resolveUserRecord(userId?: string, email?: string, fallbackLocalI
   return null;
 }
 
-:/**
+/**
  * POST /api/payments/create-session
  * ErcasPay Checkout Initialization
  */
