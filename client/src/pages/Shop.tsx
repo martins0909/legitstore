@@ -1447,7 +1447,7 @@ const Shop = () => {
                       </div>
                       <div>
                         <p className="font-bold text-slate-900 dark:text-white text-[15px]">Instant payment</p>
-                        <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-0.5">Pocketfi</p>
+                        <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-0.5">ErcasPay</p>
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-blue-500" />
