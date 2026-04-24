@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
-import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon, Activity } from "lucide-react";
+import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon, Activity, Loader2 } from "lucide-react";
 import bannerImg from "@/assets/banner.jpg";
 import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1004,7 +1004,23 @@ const Shop = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-slate-800 dark:via-[#020617] dark:to-black dark:text-white relative overflow-x-hidden md:overflow-hidden pb-28 md:pb-20 transition-colors duration-300">
+    <>
+      {isCreatingTopup && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-[85vw] w-[320px] text-center border-t-4 border-blue-500 transform scale-100 animate-in zoom-in-95 duration-200">
+            <div className="mb-6 relative">
+              <div className="absolute inset-0 bg-blue-100 dark:bg-blue-500/20 rounded-full animate-ping opacity-75"></div>
+              <div className="relative bg-white dark:bg-slate-800 p-4 rounded-full shadow-md border border-slate-100 dark:border-slate-700">
+                <Loader2 className="h-10 w-10 text-blue-600 dark:text-blue-400 animate-spin" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">ErcasPay Loading</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Connecting to secure checkout gateway...</p>
+          </div>
+        </div>
+      )}
+      
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-slate-800 dark:via-[#020617] dark:to-black dark:text-white relative overflow-x-hidden md:overflow-hidden pb-28 md:pb-20 transition-colors duration-300">
       {/* Animated gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -2174,6 +2190,7 @@ const Shop = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
