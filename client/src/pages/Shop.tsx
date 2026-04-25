@@ -1342,7 +1342,7 @@ const Shop = () => {
             <DialogDescription>
               Use the details below to make a manual bank transfer. Add the description so we can identify your payment.
             </DialogDescription>
-            <p className="text-sm text-red-600 font-medium mt-2">Contact support after payment</p>
+            <p className="text-sm text-red-600 font-medium mt-2">Click 'Done' after payment</p>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
