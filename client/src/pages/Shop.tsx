@@ -1347,7 +1347,7 @@ const Shop = () => {
 
           <div className="space-y-3 py-2">
             <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
-              <p className="text-sm font-semibold">Bank: <span className="font-normal">Palmpay</span></p>
+              <p className="text-sm font-semibold">Bank: <span className="font-normal">Moniepoint MFB</span></p>
               <p className="text-sm font-semibold">Account no.: <span className="font-normal">7026057454</span></p>
               <p className="text-sm font-semibold">Account name: <span className="font-normal">Clinton Kenechukwu</span></p>
               <p className="text-sm font-semibold">Description: <span className="font-normal">Bills</span></p>
@@ -1356,7 +1356,7 @@ const Shop = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  const details = `Bank: Palmpay\nAccount no.: 7026057454\nAccount name: Clinton Kenechukwu\nDescription: Bills`;
+                  const details = `Bank: Moniepoint MFB\nAccount no.: 7026057454\nAccount name: Clinton Kenechukwu\nDescription: Bills`;
                   navigator.clipboard.writeText(details);
                   toast.success('Account details copied');
                 }}
@@ -1365,7 +1365,10 @@ const Shop = () => {
                 Copy Details
               </Button>
               <Button
-                onClick={() => setShowManualAddFundsDialog(false)}
+                onClick={() => {
+                  setShowManualAddFundsDialog(false);
+                  window.open("https://wa.me/2347026057454", "_blank");
+                }}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white"
               >
                 Done
