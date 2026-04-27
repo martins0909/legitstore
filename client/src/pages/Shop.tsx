@@ -1595,7 +1595,7 @@ const Shop = () => {
             rel="noopener noreferrer"
             className="block relative overflow-hidden rounded-none md:rounded-2xl shadow-xl border-y-2 md:border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors w-screen left-1/2 -ml-[48vw] pr-2 md:w-full md:left-auto md:ml-0 md:pr-0"
           > */}
-          <div className="block relative overflow-hidden rounded-none md:rounded-2xl shadow-xl border-y-2 md:border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors w-screen left-1/2 -ml-[48vw] pr-2 md:w-full md:left-auto md:ml-0 md:pr-0">
+          {/* <div className="block relative overflow-hidden rounded-none md:rounded-2xl shadow-xl border-y-2 md:border-2 border-white/60 dark:border-gray-800 hover:border-blue-400 transition-colors w-screen left-1/2 -ml-[48vw] pr-2 md:w-full md:left-auto md:ml-0 md:pr-0">
             <img
               src={bannerImg}
               alt="Premium products banner"
@@ -1603,7 +1603,7 @@ const Shop = () => {
               draggable={false}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-pink-900/20 mix-blend-multiply"></div>
-          </div>
+          </div> */}
           {/* </a> */}
           
           {/* Title moved below banner */}
