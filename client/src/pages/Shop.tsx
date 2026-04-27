@@ -1265,8 +1265,11 @@ const Shop = () => {
               <BadgeCheck className="h-5 w-5 text-green-600" />
               Purchase Successful
             </DialogTitle>
-            <DialogDescription>
-              Your order has been completed. Below is your transaction summary and serial number(s).
+            <DialogDescription className="space-y-2">
+              <p>Your order has been completed. Below is your transaction summary and serial number(s).</p>
+              <div className="rounded bg-blue-50 p-2 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                <strong>Format:</strong> for Account log format |Username| password| 2FA| email
+              </div>
             </DialogDescription>
           </DialogHeader>
           {purchaseSummaryData && (
