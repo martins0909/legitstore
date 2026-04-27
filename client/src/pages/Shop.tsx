@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { apiFetch, catalogAPI, purchaseHistoryAPI, catalogCategoriesAPI, API_BASE } from "@/lib/api";
-import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon, Activity, Loader2 } from "lucide-react";
+import { Banknote, ChevronDown, History, Copy, Menu, Wallet as WalletIcon, Activity, Loader2, Download } from "lucide-react";
 import bannerImg from "@/assets/banner.jpg";
 import { Plus, Wallet, LogOut, BadgeCheck, X, ShoppingCart, Minus, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1289,21 +1289,44 @@ const Shop = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-semibold text-gray-700 dark:text-slate-300">Serial Number{purchaseSummaryData.serials.length > 1 ? 's' : ''}:</div>
-                  {purchaseSummaryData.serials.length > 1 && (
+                  <div className="flex items-center gap-2">
                     <Button
                       size="sm"
                       variant="outline"
                       className="text-xs"
                       onClick={() => {
                         const allSerials = purchaseSummaryData.serials.join('\n');
-                        navigator.clipboard.writeText(allSerials);
-                        toast.success(`${purchaseSummaryData.serials.length} logs copied!`);
+                        const blob = new Blob([allSerials], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        // Replace spaces and special chars, fallback to "purchased-items" if name is missing
+                        const safeName = (purchaseSummaryData.product?.name || 'purchased-items').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                        a.download = `${safeName}-logs.txt`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('File downloaded!');
                       }}
                     >
-                      <Copy className="h-3 w-3 mr-1" />
-                      Copy All Logs
+                      <Download className="h-3 w-3 mr-1" />
+                      Download {purchaseSummaryData.serials.length > 1 ? 'All' : 'Log'}
                     </Button>
-                  )}
+                    {purchaseSummaryData.serials.length > 1 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => {
+                          const allSerials = purchaseSummaryData.serials.join('\n');
+                          navigator.clipboard.writeText(allSerials);
+                          toast.success(`${purchaseSummaryData.serials.length} logs copied!`);
+                        }}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy All
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   {purchaseSummaryData.serials.map((serial, idx) => (
